@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Product Details - {{ product.name }}{% endblock %}
+
+{% block content %}
+  <h2>{{ product.name }}</h2>
+  <p><strong>Brand: </strong>{{ product.brand.name }}</p>
+  <p><strong>Description: </strong>{{ product.description|linebreaks }}</p>
+  <p><strong>MRP: </strong>₹{{ product.mrp }}</p>
+  <p><strong>Margin: </strong>₹{{ product.margin }}</p>
+  <p><strong>Weight: </strong>{{ product.weight_gms }} gms</p>
+  <p><strong>Active: </strong>{{ product.is_active|yesno:"Yes,No" }}</p>
+  <p><small>Created on {{ product.created_at|date:"Y-m-d H:i" }}</small></p>
+
+  <a href="{% url 'products:edit' product.pk %}" class="btn btn-primary">Edit</a>
+  <a href="{% url 'products:list' %}" class="btn btn-secondary">Back to list</a>
+{% endblock %}

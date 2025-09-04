@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Order Details - #{{ order.pk }}{% endblock %}
+
+{% block content %}
+  <h2>Order #{{ order.pk }}</h2>
+  <p><strong>Customer:</strong> {{ order.customer.name }}</p>
+  <p><strong>Status:</strong> {{ order.status|title }}</p>
+  <p><strong>Total Amount:</strong> ₹{{ order.total_amount }}</p>
+  <p><strong>Remarks:</strong> {{ order.remarks }}</p>
+  <p><small>Created on {{ order.created_at|date:"Y-m-d H:i" }}</small></p>
+
+  <h4>Items</h4>
+  {% if order.items.all %}
+  <table class="table table-bordered">
+    <thead>
+      <tr><th>Product</th><th>Quantity</th><th>Price</th></tr>
+    </thead>
+    <tbody>
+      {% for item in order.items.all %}
+      <tr>
+        <td>{{ item.product.name }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>₹{{ item.price }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p>No items in this order.</p>
+  {% endif %}
+
+  <a href="{% url 'orders:order_edit' order.pk %}" class="btn btn-primary">Edit</a>
+  <a href="{% url 'orders:list' %}" class="btn btn-secondary">Back to list</a>
+{% endblock %}

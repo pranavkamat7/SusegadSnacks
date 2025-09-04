@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Inventory - SnackHub{% endblock %}
+
+{% block content %}
+  <h2>Inventory Levels</h2>
+  <form method="get" class="mb-3">
+    <label for="id_location">Filter by Location:</label>
+    <select name="location" id="id_location" class="form-select w-auto d-inline-block">
+      <option value="">All Locations</option>
+      {% for location in locations %}
+      <option value="{{ location.id }}" {% if request.GET.location == location.id|stringformat:"s" %}selected{% endif %}>{{ location.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+  </form>
+
+  {% if inventories %}
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Location</th>
+        <th>Quantity</th>
+        <th>Last Updated</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for stock in inventories %}
+      <tr>
+        <td>{{ stock.product.name }}</td>
+        <td>{{ stock.location.name }}</td>
+        <td>{{ stock.quantity }}</td>
+        <td>{{ stock.updated_at|date:"Y-m-d H:i" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p>No inventory data found.</p>
+  {% endif %}
+{% endblock %}

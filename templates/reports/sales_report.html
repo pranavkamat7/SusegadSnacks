@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Sales Report - SnackHub{% endblock %}
+
+{% block content %}
+  <h2>Sales Report</h2>
+
+  <p><strong>Total Sales:</strong> ₹{{ sales_stats.total_sales }}</p>
+  <p><strong>Total Orders:</strong> {{ sales_stats.total_orders }}</p>
+
+  <h4>Top Products</h4>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Total Quantity Sold</th>
+        <th>Total Sales Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ps in sales_stats.product_stats %}
+        <tr>
+          <td>{{ ps.product__name }}</td>
+          <td>{{ ps.total_quantity }}</td>
+          <td>₹{{ ps.total_revenue }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

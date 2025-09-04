@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Brands - SnackHub{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Brands</h2>
+    <a href="{% url 'brands:create' %}" class="btn btn-primary">Add Brand</a>
+  </div>
+
+  {% if brands %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Created At</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for brand in brands %}
+          <tr>
+            <td><a href="{% url 'brands:detail' brand.pk %}">{{ brand.name }}</a></td>
+            <td>{{ brand.created_at|date:"Y-m-d" }}</td>
+            <td>
+              <a href="{% url 'brands:edit' brand.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No brands found.</p>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load form_tags %}
+{% block title %}Place Order - SnackHub{% endblock %}
+
+{% block content %}
+<h2>Place Order</h2>
+<form method="post" novalidate>
+    {% csrf_token %}
+
+    <fieldset class="mb-3">
+        <legend>Order Details</legend>
+        {{ order_form.non_field_errors }}
+        <div class="mb-3">
+            {{ order_form.customer.label_tag }}
+            {{ order_form.customer|add_class:"form-select" }}
+            {{ order_form.customer.errors }}
+        </div>
+        <div class="mb-3">
+            {{ order_form.status.label_tag }}
+            {{ order_form.status|add_class:"form-select" }}
+            {{ order_form.status.errors }}
+        </div>
+        <div class="mb-3">
+            {{ order_form.remarks.label_tag }}
+            {{ order_form.remarks|add_class:"form-control" }}
+            {{ order_form.remarks.errors }}
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Order Items</legend>
+        {{ formset.management_form }}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Delete?</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in formset.forms %}
+                <tr>
+                    <td>{{ form.product.errors }}{{ form.product|add_class:"form-select" }}</td>
+                    <td>{{ form.quantity.errors }}{{ form.quantity|add_class:"form-control" }}</td>
+                    <td>{% if form.instance.pk %}{{ form.DELETE }}{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="button" id="add-item" class="btn btn-sm btn-outline-primary">Add another item</button>
+    </fieldset>
+
+    <button type="submit" class="btn btn-success mt-3">Submit Order</button>
+    <a href="{% url 'orders:list' %}" class="btn btn-secondary mt-3">Cancel</a>
+</form>
+
+<script>
+const addItemBtn = document.getElementById("add-item");
+addItemBtn.addEventListener("click", () => {
+    const formsetPrefix = "{{ formset.prefix }}";
+    const totalForms = document.getElementById(`id_${formsetPrefix}-TOTAL_FORMS`);
+    const currentFormCount = parseInt(totalForms.value);
+
+    const emptyRow = document.querySelectorAll('tbody tr')[0].cloneNode(true);
+    emptyRow.querySelectorAll('select, input').forEach(el => {
+        const name = el.name.replace(`-${currentFormCount - 1}-`, `-${currentFormCount}-`);
+        const id = 'id_' + name;
+        el.name = name;
+        el.id = id;
+        if (el.type !== 'hidden') el.value = '';
+    });
+
+    document.querySelector('tbody').appendChild(emptyRow);
+    totalForms.value = currentFormCount + 1;
+});
+</script>
+{% endblock %}

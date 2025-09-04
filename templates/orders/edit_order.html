@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-5" style="max-width: 600px;">
+  <h2 class="mb-4 text-center">Edit Sales Order #{{ order.pk }}</h2>
+  <form method="post" class="needs-validation" novalidate>
+    {% csrf_token %}
+    <div class="mb-4">
+    <label for="status" class="form-label">Order Status</label>
+    <select id="status" name="status" class="form-select" required>
+      {% for value, label in status_choices %}
+        <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Quantity</th>
+          <th>Price (₹)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in products %}
+          <tr>
+            <td>{{ item.product.name }}</td>
+            <td>
+              <input type="number" name="quantity_{{ item.id }}" value="{{ item.quantity }}" min="0" class="form-control" required>
+            </td>
+            <td>₹{{ item.price|floatformat:2 }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <button type="submit" class="btn btn-primary w-100 mt-4">Update Order</button>
+  </form>
+</div>
+
+<script>
+(() => {
+  'use strict'
+  const forms = document.querySelectorAll('.needs-validation')
+  Array.from(forms).forEach(form => {
+    form.addEventListener('submit', event => {
+      if (!form.checkValidity()) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+      form.classList.add('was-validated')
+    }, false)
+  })
+})()
+</script>
+{% endblock %}

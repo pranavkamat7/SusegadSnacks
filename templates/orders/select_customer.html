@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-5" style="max-width: 480px;">
+  <h2 class="mb-4 text-center">Select Customer</h2>
+  <form method="post" class="needs-validation" novalidate>
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="customer" class="form-label">Customer</label>
+      <select id="customer" name="customer" class="form-select" required>
+        <option value="" selected disabled>-- Select a Customer --</option>
+        {% for cust in customers %}
+          <option value="{{ cust.id }}">{{ cust.name }}</option>
+        {% endfor %}
+      </select>
+      <div class="invalid-feedback">
+        Please select a customer before continuing.
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Next</button>
+  </form>
+</div>
+
+<script>
+(() => {
+  'use strict'
+  const forms = document.querySelectorAll('.needs-validation')
+  Array.from(forms).forEach(form => {
+    form.addEventListener('submit', event => {
+      if (!form.checkValidity()) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+      form.classList.add('was-validated')
+    }, false)
+  })
+})()
+</script>
+{% endblock %}

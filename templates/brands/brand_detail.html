@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Brand Details - {{ brand.name }}{% endblock %}
+
+{% block content %}
+  <h2>{{ brand.name }}</h2>
+  <p>{{ brand.description|linebreaks }}</p>
+  <p><small>Created at: {{ brand.created_at|date:"Y-m-d H:i" }}</small></p>
+  <a href="{% url 'brands:edit' brand.pk %}" class="btn btn-primary">Edit</a>
+  <a href="{% url 'brands:list' %}" class="btn btn-secondary">Back to list</a>
+{% endblock %}

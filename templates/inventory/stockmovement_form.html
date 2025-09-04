@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load form_tags %}
+{% block title %}
+  {% if form.instance.pk %}Edit Stock Movement{% else %}Add Stock Movement{% endif %} - SnackHub
+{% endblock %}
+
+{% block content %}
+  <h2>{% if form.instance.pk %}Edit Stock Movement{% else %}Add Stock Movement{% endif %}</h2>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <div class="mb-3">
+      {{ form.product.label_tag }}
+      {{ form.product|add_class:"form-select" }}
+      {{ form.product.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.location.label_tag }}
+      {{ form.location|add_class:"form-select" }}
+      {{ form.location.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.movement_type.label_tag }}
+      {{ form.movement_type|add_class:"form-select" }}
+      {{ form.movement_type.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.quantity.label_tag }}
+      {{ form.quantity|add_class:"form-control" }}
+      {{ form.quantity.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.reference.label_tag }}
+      {{ form.reference|add_class:"form-control" }}
+      {{ form.reference.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.notes.label_tag }}
+      {{ form.notes|add_class:"form-control" }}
+      {{ form.notes.errors }}
+    </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
+    <a href="{% url 'inventory:stockmovement_list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+{% endblock %}

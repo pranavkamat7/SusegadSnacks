@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Invoices - SnackHub{% endblock %}
+
+{% block content %}
+  <h2>Invoices</h2>
+  {% if invoices %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Invoice Number</th>
+          <th>Order ID</th>
+          <th>Total</th>
+          <th>Payment Status</th>
+          <th>Payment Mode</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for invoice in invoices %}
+          <tr>
+            <td><a href="{% url 'billing:detail' invoice.pk %}">{{ invoice.invoice_number }}</a></td>
+            <td>{{ invoice.order.pk }}</td>
+            <td>₹{{ invoice.total }}</td>
+            <td>{{ invoice.payment_status|title }}</td>
+            <td>{{ invoice.payment_mode }}</td>
+            <td>{{ invoice.created_at|date:"Y-m-d" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No invoices found.</p>
+  {% endif %}
+{% endblock %}

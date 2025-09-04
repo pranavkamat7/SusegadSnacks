@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load form_tags%}
+{% block content %}
+<div class="container my-5" style="max-width: 720px;">
+  <h2 class="mb-4 text-center">Confirm Sales Order</h2>
+  <h3>Customer</h3>
+  <p class="fs-5 mb-4">{{ customer.name }}</p>
+  <h3>Products</h3>
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Product</th>
+          <th>Quantity</th>
+          <th>Price (₹)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+          <tr>
+            <td>{{ product.name }}</td>
+            <td>{{ quantities|get_item:product.id|stringformat:"s" }}</td>
+            <td>₹{{ product.mrp|floatformat:2 }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <form method="post" class="mt-4 text-center">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-success btn-lg px-5">Confirm Order</button>
+  </form>
+</div>
+{% endblock %}

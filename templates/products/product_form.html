@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load form_tags %}
+{% block title %}
+  {% if form.instance.pk %}Edit Product{% else %}Add Product{% endif %} - SnackHub
+{% endblock %}
+
+{% block content %}
+  <h2>{% if form.instance.pk %}Edit Product{% else %}Add Product{% endif %}</h2>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    
+    <div class="mb-3">
+      {{ form.brand.label_tag }}
+      {{ form.brand|add_class:"form-select" }}
+      {{ form.brand.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.name.label_tag }}
+      {{ form.name|add_class:"form-control" }}
+      {{ form.name.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.description.label_tag }}
+      {{ form.description|add_class:"form-control" }}
+      {{ form.description.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.mrp.label_tag }}
+      {{ form.mrp|add_class:"form-control" }}
+      {{ form.mrp.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.margin.label_tag }}
+      {{ form.margin|add_class:"form-control" }}
+      {{ form.margin.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.weight_gms.label_tag }}
+      {{ form.weight_gms|add_class:"form-control" }}
+      {{ form.weight_gms.errors }}
+    </div>
+
+    <div class="form-check mb-3">
+      {{ form.is_active }}
+      {{ form.is_active.label_tag }}
+      {{ form.is_active.errors }}
+    </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
+    <a href="{% url 'products:list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+{% endblock %}

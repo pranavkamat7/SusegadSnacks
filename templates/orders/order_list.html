@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Orders - SnackHub{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Orders</h2>
+    <a href="{% url 'orders:select_customer' %}" class="btn btn-primary">Add Order</a>
+  </div>
+
+  {% if orders %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Status</th>
+          <th>Total Amount</th>
+          <th>Created At</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+          <tr>
+            <td><a href="{% url 'orders:detail' order.pk %}">{{ order.pk }}</a></td>
+            <td>{{ order.customer.name }}</td>
+            <td>{{ order.status|title }}</td>
+            <td>₹{{ order.total_amount }}</td>
+            <td>{{ order.created_at|date:"Y-m-d" }}</td>
+            <td><a href="{% url 'orders:order_edit' order.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No orders found.</p>
+  {% endif %}
+{% endblock %}

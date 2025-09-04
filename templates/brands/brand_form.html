@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load form_tags %}
+{% block title %}
+  {% if form.instance.pk %}Edit Brand{% else %}Add Brand{% endif %} - SnackHub
+{% endblock %}
+
+{% block content %}
+  <h2>{% if form.instance.pk %}Edit Brand{% else %}Add Brand{% endif %}</h2>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="mb-3">
+      {{ form.name.label_tag }}
+      {{ form.name|add_class:"form-control" }}
+      {{ form.name.errors }}
+    </div>
+    <div class="mb-3">
+      {{ form.description.label_tag }}
+      {{ form.description|add_class:"form-control" }}
+      {{ form.description.errors }}
+    </div>
+    <button type="submit" class="btn btn-success">Save</button>
+    <a href="{% url 'brands:list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+{% endblock %}

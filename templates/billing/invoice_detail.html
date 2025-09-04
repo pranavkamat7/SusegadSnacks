@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Invoice - {{ invoice.invoice_number }}{% endblock %}
+
+{% block content %}
+  <h2>Invoice {{ invoice.invoice_number }}</h2>
+  <p><strong>Order ID:</strong> {{ invoice.order.pk }}</p>
+  <p><strong>Total:</strong> ₹{{ invoice.total }}</p>
+  <p><strong>Payment Status:</strong> {{ invoice.payment_status|title }}</p>
+  <p><strong>Payment Mode:</strong> {{ invoice.payment_mode }}</p>
+  <p><small>Created on {{ invoice.created_at|date:"Y-m-d H:i" }}</small></p>
+
+  <a href="{% url 'billing:list' %}" class="btn btn-secondary">Back to Invoice List</a>
+{% endblock %}
