@@ -25,7 +25,7 @@
             <td><a href="{% url 'orders:detail' order.pk %}">{{ order.pk }}</a></td>
             <td>{{ order.customer.name }}</td>
             <td>{{ order.status|title }}</td>
-            <td>₹{{ order.total_amount }}</td>
+            <td>Rs {{ order.total_amount }}</td>
             <td>{{ order.created_at|date:"Y-m-d" }}</td>
             <td><a href="{% url 'orders:order_edit' order.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a></td>
           </tr>

@@ -1,40 +1,79 @@
 {% extends 'base.html' %}
-{% load form_tags %}
 {% block title %}
-  {% if form.instance.pk %}Edit Customer{% else %}Add Customer{% endif %} - SnackHub
+  {% if customer %}Edit Customer{% else %}Add Customer{% endif %} - SnackHub
 {% endblock %}
 
 {% block content %}
-  <h2>{% if form.instance.pk %}Edit Customer{% else %}Add Customer{% endif %}</h2>
-  <form method="post" novalidate>
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-
-    <div class="mb-3">
-      {{ form.name.label_tag }}
-      {{ form.name|add_class:"form-control" }}
-      {{ form.name.errors }}
+<h2>{% if customer %}Edit Customer{% else %}Add Customer{% endif %}</h2>
+<form method="post">
+  {% csrf_token %}
+  <div class="mb-3">
+    <label>Name:</label>
+    <input type="text" name="name" class="form-control" value="{{ customer.name|default_if_none:'' }}">
+  </div>
+  <div class="mb-3">
+    <label>Customer Type:</label>
+    <select name="customer_type" class="form-select">
+      {% for ctype in customer_types %}
+      <option value="{{ ctype.id }}"
+        {% if customer.customer_type.id == ctype.id %}selected{% endif %}>{{ ctype.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-3">
+    <label>Phone:</label>
+    <input type="text" name="phone" class="form-control" value="{{ customer.phone|default_if_none:'' }}">
+  </div>
+  <div class="mb-3">
+    <label>Email:</label>
+    <input type="email" name="email" class="form-control" value="{{ customer.email|default_if_none:'' }}">
+  </div>
+  <hr>
+  <h4>Address</h4>
+  {% for i, addr in addresses %}
+  <div class="card mb-3 p-3">
+    <input type="hidden" name="address_id_{{ i }}" value="{{ addr.id }}">
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label>Address line1:</label>
+        <input type="text" name="address_line1_{{ i }}" value="{{ addr.address_line1 }}" class="form-control">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label>Address line2:</label>
+        <input type="text" name="address_line2_{{ i }}" value="{{ addr.address_line2 }}" class="form-control">
+      </div>
     </div>
-
-    <div class="mb-3">
-      {{ form.customer_type.label_tag }}
-      {{ form.customer_type|add_class:"form-select" }}
-      {{ form.customer_type.errors }}
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label>City:</label>
+        <input type="text" name="city_{{ i }}" value="{{ addr.city }}" class="form-control">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>State:</label>
+        <input type="text" name="state_{{ i }}" value="{{ addr.state }}" class="form-control">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Pincode:</label>
+        <input type="text" name="pincode_{{ i }}" value="{{ addr.pincode }}" class="form-control">
+      </div>
     </div>
-
-    <div class="mb-3">
-      {{ form.phone.label_tag }}
-      {{ form.phone|add_class:"form-control" }}
-      {{ form.phone.errors }}
+    <div class="row">
+      <div class="col-md-8 mb-3">
+        <label>Country:</label>
+        <input type="text" name="country_{{ i }}" value="{{ addr.country }}" class="form-control">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Is primary:</label>
+        <input type="checkbox" name="is_primary_{{ i }}" {% if addr.is_primary %}checked{% endif %}>
+      </div>
     </div>
-
-    <div class="mb-3">
-      {{ form.email.label_tag }}
-      {{ form.email|add_class:"form-control" }}
-      {{ form.email.errors }}
+    <div class="form-check mt-2">
+      <input type="checkbox" name="delete_{{ i }}" class="form-check-input">
+      <label>Delete:</label>
     </div>
-
-    <button type="submit" class="btn btn-success">Save</button>
-    <a href="{% url 'customers:list' %}" class="btn btn-secondary">Cancel</a>
-  </form>
+  </div>
+  {% endfor %}
+  <button type="submit" class="btn btn-success">Save</button>
+  <a href="{% url 'customers:list' %}" class="btn btn-secondary">Cancel</a>
+</form>
 {% endblock %}

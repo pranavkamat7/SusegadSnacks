@@ -15,19 +15,19 @@
     <table class="table table-bordered">
       <thead>
         <tr>
-          <th>Product</th>
+          <th>Product</th> 
           <th>Quantity</th>
-          <th>Price (₹)</th>
+          <th>Price (Rs)</th>
         </tr>
       </thead>
       <tbody>
         {% for item in products %}
           <tr>
-            <td>{{ item.product.name }}</td>
+            <td>{{ item.product.name }} Rs {{item.product.mrp|floatformat:0}}</td>
             <td>
               <input type="number" name="quantity_{{ item.id }}" value="{{ item.quantity }}" min="0" class="form-control" required>
             </td>
-            <td>₹{{ item.price|floatformat:2 }}</td>
+            <td>Rs {{ item.price|floatformat:2 }}</td>
           </tr>
         {% endfor %}
       </tbody>

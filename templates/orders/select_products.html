@@ -20,7 +20,7 @@
           <tbody>
             {% for product in products %}
               <tr>
-                <td>{{ product.name }}</td>
+                <td>{{ product.name }} Rs {{product.mrp|floatformat:0}}</td>
                 <td>
                   <input type="number"
                          name="product_{{ product.id }}"

@@ -13,7 +13,7 @@
       </li>
     {% endfor %}
   </ul>
-  <p class="fs-4 fw-bold text-end">Total: ₹{{ order.total_amount }}</p>
+  <p class="fs-4 fw-bold text-end">Total: Rs{{ order.total_amount }}</p>
   <div class="d-flex justify-content-center gap-3 mt-4">
     <a href="{% url 'orders:order_edit' order.pk %}" class="btn btn-warning btn-lg">Edit Order</a>
     <a href="{% url 'orders:list' %}" class="btn btn-secondary btn-lg">Back to Orders List</a>

@@ -2,12 +2,49 @@
 {% block title %}Customer Details - {{ customer.name }}{% endblock %}
 
 {% block content %}
-  <h2>{{ customer.name }}</h2>
-  <p><strong>Type:</strong> {{ customer.customer_type.name }}</p>
-  <p><strong>Phone:</strong> {{ customer.phone }}</p>
-  <p><strong>Email:</strong> {{ customer.email }}</p>
-  <p><small>Created on {{ customer.created_at|date:"Y-m-d H:i" }}</small></p>
+<div class="container mt-4">
+  <h2 class="mb-3">{{ customer.name }}</h2>
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <ul class="list-group">
+        <li class="list-group-item"><strong>Type:</strong> {{ customer.customer_type.name }}</li>
+        <li class="list-group-item"><strong>Phone:</strong> {{ customer.phone }}</li>
+        <li class="list-group-item"><strong>Email:</strong> {{ customer.email }}</li>
+        <li class="list-group-item"><small class="text-muted">Created on {{ customer.created_at|date:"Y-m-d H:i" }}</small></li>
+      </ul>
+    </div>
+  </div>
 
-  <a href="{% url 'customers:edit' customer.pk %}" class="btn btn-primary">Edit</a>
+  <h4>Address</h4>
+  {% if customer.addresses.all %}
+    <div class="row mb-4">
+      {% for addr in customer.addresses.all %}
+      <div class="col-md-6">
+        <div class="card mb-3 shadow-sm">
+          <div class="card-body">
+            <p><strong>Address Line 1:</strong> {{ addr.address_line1 }}</p>
+            {% if addr.address_line2 %}
+            <p><strong>Address Line 2:</strong> {{ addr.address_line2 }}</p>
+            {% endif %}
+            <p>
+              <strong>City:</strong> {{ addr.city }},
+              <strong>State:</strong> {{ addr.state }},
+              <strong>Pincode:</strong> {{ addr.pincode }}
+            </p>
+            <p><strong>Country:</strong> {{ addr.country }}</p>
+            {% if addr.is_primary %}
+              <span class="badge bg-primary">Primary</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No addresses added.</p>
+  {% endif %}
+
+  <a href="{% url 'customers:edit' customer.pk %}" class="btn btn-primary me-2">Edit</a>
   <a href="{% url 'customers:list' %}" class="btn btn-secondary">Back to list</a>
+</div>
 {% endblock %}
