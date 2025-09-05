@@ -5,35 +5,38 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ------------------------------
-# SECURITY SETTINGS
+# SECURITY
 # ------------------------------
 SECRET_KEY = os.getenv("SECRET_KEY", "unsafe-secret-key")  # fallback for local dev
-DEBUG = os.getenv("DEBUG", "False") == "True"
+DEBUG = os.getenv("DEBUG", "True") == "True"
 
-# Render gives you a free subdomain like myapp.onrender.com
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".onrender.com"]
 
 # ------------------------------
-# DATABASE
+# APPLICATIONS
 # ------------------------------
-DATABASES = {
-    "default": dj_database_url.config(
-        default="postgresql://postgres:postgres@localhost:5432/postgres",  # local fallback
-        conn_max_age=600,
-    )
-}
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
 
-# ------------------------------
-# STATIC FILES
-# ------------------------------
-STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+    # Custom apps
+    'brands',
+    'products',
+    'customers',
+    'orders',
+    'billing',
+    'reports',
+    'core',
+    'inventory',
+]
 
-# WhiteNoise for serving static files
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # 👈 add this line just after SecurityMiddleware
-    # ... keep existing middleware below
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # 👈 for static files in prod
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -42,9 +45,75 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# WhiteNoise settings (compressed static files)
+ROOT_URLCONF = "core.urls"
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = "core.wsgi.application"
+
+# ------------------------------
+# DATABASE
+# ------------------------------
+# Use Postgres on Render, SQLite locally (easier dev setup)
+if os.getenv("RENDER"):
+    DATABASES = {
+        "default": dj_database_url.config(
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+
+# ------------------------------
+# PASSWORD VALIDATION
+# ------------------------------
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+
+# ------------------------------
+# INTERNATIONALIZATION
+# ------------------------------
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
+USE_I18N = True
+USE_TZ = True
+
+# ------------------------------
+# STATIC FILES
+# ------------------------------
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
+# ------------------------------
+# DEFAULT PRIMARY KEY FIELD
+# ------------------------------
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
