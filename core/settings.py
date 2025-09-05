@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ------------------------------
 SECRET_KEY = os.getenv("SECRET_KEY", "unsafe-secret-key")  # fallback for local dev
 DEBUG = os.getenv("DEBUG", "True") == "True"
-
+DATABASE_URL = os.getenv("DATABASE_URL")
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".onrender.com"]
 
 # ------------------------------
@@ -68,14 +68,17 @@ WSGI_APPLICATION = "core.wsgi.application"
 # DATABASE
 # ------------------------------
 # Use Postgres on Render, SQLite locally (easier dev setup)
-if os.getenv("RENDER"):
+if DATABASE_URL:
+    # Use Postgres from Render
     DATABASES = {
         "default": dj_database_url.config(
+            default=DATABASE_URL,
             conn_max_age=600,
-            ssl_require=True,
+            ssl_require=True
         )
     }
 else:
+    # Fallback for local development (SQLite)
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
