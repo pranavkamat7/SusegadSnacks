@@ -8,6 +8,7 @@
   </div>
 
   {% if customers %}
+  <div class="table-responsive">
     <table class="table table-striped">
       <thead>
         <tr>
@@ -32,6 +33,7 @@
         {% endfor %}
       </tbody>
     </table>
+  </div>
   {% else %}
     <p>No customers found.</p>
   {% endif %}

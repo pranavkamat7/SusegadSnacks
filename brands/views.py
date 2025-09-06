@@ -1,5 +1,5 @@
 from django.http import HttpResponseRedirect
-from django.views.generic import ListView, CreateView, DetailView, UpdateView
+from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .models import Brand
 from .forms import BrandForm
@@ -34,3 +34,9 @@ class BrandUpdateView(UpdateView):
     def form_valid(self, form):
         # Optional: Add custom update logic here if needed
         return super().form_valid(form)
+
+
+class BrandDeleteView(DeleteView):
+    model = Brand
+    template_name = 'brands/brand_confirm_delete.html'
+    success_url = reverse_lazy('brands:list')

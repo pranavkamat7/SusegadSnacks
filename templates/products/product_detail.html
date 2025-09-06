@@ -13,4 +13,6 @@
 
   <a href="{% url 'products:edit' product.pk %}" class="btn btn-primary">Edit</a>
   <a href="{% url 'products:list' %}" class="btn btn-secondary">Back to list</a>
+
+  <a href="{% url 'products:delete' product.pk %}" class="btn btn-danger">Delete</a>
 {% endblock %}

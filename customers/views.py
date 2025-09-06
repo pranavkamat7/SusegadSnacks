@@ -4,7 +4,7 @@ from django.views.generic import ListView, CreateView, DetailView, UpdateView
 from django.urls import reverse_lazy
 from .models import Customer, CustomerAddress, CustomerType
 from .services import CustomerService
-
+from django.views.decorators.http import require_http_methods
 class CustomerListView(ListView):
     model = Customer
     template_name = 'customers/customer_list.html'
@@ -131,3 +131,12 @@ def customer_edit(request, customer_id):
         "customer_types": customer_types,
         "addresses": list(enumerate(addresses))
     })
+
+
+@require_http_methods(["GET", "POST"])
+def customer_delete(request, customer_id):
+    customer = get_object_or_404(Customer, id=customer_id)
+    if request.method == "POST":
+        customer.delete()
+        return redirect("customers:list")
+    return render(request, 'customers/customer_confirm_delete.html', {'customer': customer})

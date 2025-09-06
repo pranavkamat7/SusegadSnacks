@@ -1,5 +1,5 @@
 from django.http import HttpResponseRedirect
-from django.views.generic import ListView, CreateView, DetailView, UpdateView
+from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .models import Product
 from .forms import ProductForm
@@ -30,4 +30,11 @@ class ProductUpdateView(UpdateView):
     model = Product
     form_class = ProductForm
     template_name = 'products/product_form.html'
+    success_url = reverse_lazy('products:list')
+
+
+
+class ProductDeleteView(DeleteView):
+    model = Product
+    template_name = 'products/product_confirm_delete.html'
     success_url = reverse_lazy('products:list')
