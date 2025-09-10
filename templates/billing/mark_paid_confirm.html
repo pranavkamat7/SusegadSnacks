@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Confirm Payment | We-eat{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 480px;">
+  <h2 class="text-center mb-4" style="color: var(--accent-color); font-weight: 700;">Confirm Payment</h2>
+
+  <p>Mark the amount <strong>{{ split.amount }}</strong> for expense <strong>{{ split.expense.description }}</strong> as paid?</p>
+
+  <form method="post" class="text-center mt-4">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-accent btn-lg me-3">Yes, Mark as Paid</button>
+    <a href="{% url 'billing:expense_list' %}" class="btn btn-secondary btn-lg">Cancel</a>
+  </form>
+</div>
+
+<style>
+  .btn-accent {
+    background-color: #b5ff2a;
+    color: #18191b;
+    border: none;
+    border-radius: 12px;
+  }
+
+  .btn-accent:hover,
+  .btn-accent:focus {
+    background-color: #a0e126;
+    color: #18191b;
+  }
+</style>
+{% endblock %}

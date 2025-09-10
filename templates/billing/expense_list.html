@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load form_tags %}
+{% block title %}My Expenses | We-eat{% endblock %}
+
+{% block content %}
+<h2 style="color: var(--accent-color); margin-bottom: 24px;">My Expenses</h2>
+
+<a href="{% url 'billing:add_expense' %}" class="btn btn-primary" style="margin-bottom:15px;">Add Expense</a>
+
+<div class="table-responsive">
+  <table class="table table-striped">
+      <thead>
+          <tr>
+              <th>Description</th>
+              <th>Amount</th>
+              <th>Date</th>
+              <th>Splits</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for expense in expenses %}
+          <tr>
+              <td>{{ expense.description }}</td>
+              <td>{{ expense.amount|lakhcomma }}</td>
+              <td>{{ expense.date_incurred }}</td>
+              <td>
+                  <ul>
+                      {% for split in expense.splits.all %}
+                    <li>
+                        {{ split.user.get_full_name|default:split.user.username }}: {{ split.amount|lakhcomma }}
+                        {% if split.is_paid %}
+                        <span class="text-success">(Paid on {{ split.paid_date }})</span>
+                        {% else %}
+                        <span class="text-warning">(Unpaid)</span>
+                        {% if split.user == request.user %}
+                            <a href="{% url 'billing:mark_paid' split.id %}">Mark as Paid</a>
+                        {% endif %}
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                  </ul>
+              </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" style="text-align:center;">No expenses found.</td></tr>
+          {% endfor %}
+      </tbody>
+  </table>
+</div>
+{% endblock %}

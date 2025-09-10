@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Custom apps
+    'accounts',
     'brands',
     'products',
     'customers',
@@ -46,6 +47,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "core.urls"
+# AUTH_USER_MODEL = 'accounts.CustomUser'
 
 TEMPLATES = [
     {
@@ -120,3 +122,6 @@ STORAGES = {
 # DEFAULT PRIMARY KEY FIELD
 # ------------------------------
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

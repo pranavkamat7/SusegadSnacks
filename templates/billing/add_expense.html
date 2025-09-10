@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load form_tags %}
+{% block title %}Add Expense | We-eat{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 720px;">
+  <h2 class="mb-4 text-accent fw-bold text-center">Add Expense</h2>
+
+  <form method="post" id="expenseForm" class="bg-light p-4 rounded shadow-sm" novalidate>
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label for="description" class="form-label fw-semibold">Description</label>
+      <input type="text" id="description" name="description" value="{{ posted.description }}" class="form-control form-control-lg {% if errors.description %}is-invalid{% endif %}" required autofocus>
+      <div class="invalid-feedback">{{ errors.description }}</div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label for="amount" class="form-label fw-semibold">Amount</label>
+        <input type="number" step="0.01" id="amount" name="amount" value="{{ posted.amount }}" class="form-control form-control-lg {% if errors.amount %}is-invalid{% endif %}" required>
+        <div class="invalid-feedback">{{ errors.amount }}</div>
+      </div>
+      <div class="col-md-6">
+        <label for="date_incurred" class="form-label fw-semibold">Date</label>
+        <input type="date" id="date_incurred" name="date_incurred" value="{{ posted.date_incurred }}" class="form-control form-control-lg {% if errors.date_incurred %}is-invalid{% endif %}" required>
+        <div class="invalid-feedback">{{ errors.date_incurred }}</div>
+      </div>
+    </div>
+
+    <fieldset class="mb-4">
+      <legend class="fs-5 fw-semibold mb-3">Split Among Users</legend>
+      {% if errors.users %}
+        <div class="alert alert-danger py-2">{{ errors.users }}</div>
+      {% endif %}
+      {% if errors.splits %}
+        <div class="alert alert-danger py-2">{{ errors.splits }}</div>
+      {% endif %}
+
+      <div id="userSplitsContainer" class="row gx-3">
+        {% for user in users %}
+          <div class="col-md-6 d-flex align-items-center gap-2 mb-3">
+            <input type="checkbox" id="user_{{ user.id }}" name="users" value="{{ user.id }}"
+                   class="form-check-input user-checkbox"
+                   {% if user.id|stringformat:"s" in selected_user_ids %}checked{% endif %}>
+            <label for="user_{{ user.id }}" class="form-check-label flex-grow-1">{{ user.get_full_name|default:user.username }}</label>
+
+            <input type="number" step="0.01" name="splits" placeholder="Amount"
+                   class="form-control form-control-sm split-input flex-shrink-0" style="max-width: 110px;"
+                   value="{{ manual_splits|get_item:user.id|stringformat:'s'|default:'' }}" />
+          </div>
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    <button type="submit" class="btn btn-accent btn-lg w-100 fw-bold shadow-sm">Add Expense</button>
+  </form>
+</div>
+
+<style>
+  /* Accent color utility */
+  .text-accent {
+    color: #b5ff2a;
+  }
+  .btn-accent {
+    background: #b5ff2a;
+    color: #18191b;
+  }
+  .btn-accent:hover:enabled,
+  .btn-accent:focus:enabled {
+    background: #a0e126;
+    color: #18191b;
+  }
+</style>
+
+<script>
+function autoSplitAmount() {
+  const amountInput = document.getElementById('amount');
+  const userCheckboxes = document.querySelectorAll('.user-checkbox');
+  const splitInputs = document.querySelectorAll('.split-input');
+
+  function recalcSplits() {
+    const amount = parseFloat(amountInput.value) || 0;
+    const checkedIndices = [];
+    userCheckboxes.forEach((chk, idx) => {
+      if (chk.checked) checkedIndices.push(idx);
+    });
+    const numChecked = checkedIndices.length;
+
+    if (numChecked === 0) {
+      splitInputs.forEach(input => { input.value = ''; input.dataset.lastEqualSplit = ''; });
+      return;
+    }
+
+    const equalShare = Math.round((amount / numChecked) * 100) / 100;
+
+    splitInputs.forEach((input, idx) => {
+      const userChk = userCheckboxes[idx];
+      if (userChk.checked) {
+        if (!input.dataset.userEdited || input.value === '' || parseFloat(input.value) === parseFloat(input.dataset.lastEqualSplit || '0')) {
+          input.value = equalShare.toFixed(2);
+          input.dataset.userEdited = false;
+        }
+        input.dataset.lastEqualSplit = equalShare.toFixed(2);
+      } else {
+        input.value = '';
+        input.dataset.userEdited = false;
+        input.dataset.lastEqualSplit = '';
+      }
+    });
+  }
+
+  splitInputs.forEach(input => {
+    input.addEventListener('input', () => {
+      input.dataset.userEdited = true;
+    });
+  });
+
+  amountInput.addEventListener('input', recalcSplits);
+  userCheckboxes.forEach(chk => chk.addEventListener('change', recalcSplits));
+
+  recalcSplits();
+}
+
+document.addEventListener('DOMContentLoaded', autoSplitAmount);
+</script>
+{% endblock %}

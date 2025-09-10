@@ -1,5 +1,5 @@
 from django import template
-
+from babel.numbers import format_number
 register = template.Library()
 
 @register.filter(name='add_class')
@@ -18,3 +18,8 @@ def split(value, key):
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(str(key))
+
+
+@register.filter
+def lakhcomma(value):
+    return format_number(value, locale='en_IN')
