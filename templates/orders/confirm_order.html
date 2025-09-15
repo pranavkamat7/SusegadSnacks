@@ -12,7 +12,7 @@
         <tr>
           <th>Product</th>
           <th>Quantity</th>
-          <th>PTR (Rs)</th>
+          <th>Total</th>
         </tr>
       </thead>
       <tbody>
@@ -27,7 +27,7 @@
                     </small>
                 </td>  
             <td>{{ quantities|get_item:product.id|stringformat:"s" }}</td>
-            <td>{{ product.ptr|floatformat:0 }}</td>
+            <td >₹{% widthratio quantities|get_item:product.id|stringformat:"s" 1 product.ptr %}</td>
           </tr>
         {% endfor %}
       </tbody>

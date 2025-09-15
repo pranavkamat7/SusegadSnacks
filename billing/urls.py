@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import InvoiceListView, InvoiceDetailView, GenerateInvoiceView, add_expense, expense_list, generate_invoice, invoice_detail, invoice_list, mark_invoice_as_paid, mark_paid, record_payment
+from .views import InvoiceListView, InvoiceDetailView, GenerateInvoiceView, add_expense, expense_list, generate_invoice, invoice_detail, invoice_list, mark_invoice_as_paid, mark_paid, record_payment, render_pdf_view
 
 app_name = 'billing'
 
@@ -14,4 +14,5 @@ urlpatterns = [
     path('invoice/<int:invoice_id>/', invoice_detail, name='invoice_detail'),
     path('mark-as-paid/<int:invoice_id>/', mark_invoice_as_paid, name='mark_invoice_as_paid'),
     path('record-payment/<int:invoice_id>/', record_payment, name='record_payment'),
+    path('invoice/<int:invoice_id>/pdf/', render_pdf_view, name='invoice_pdf'),
 ]

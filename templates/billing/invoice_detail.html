@@ -7,32 +7,68 @@
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
             <div>
                 <h2 class="mb-0">Invoice #{{ invoice.invoice_number }}</h2>
-                <p class="mb-0 text-muted"><small>For Order #{{ invoice.order.id }}</small></p>
+                <p class="mb-0 text-muted"><small>For Order #{{ invoice.order.id }} | Dated: {{ invoice.created_at|date:"F d, Y" }}</small></p>
             </div>
-            <span class="badge bg-{% if invoice.payment_status == 'paid' %}success{% elif invoice.payment_status == 'partial' %}primary{% else %}warning{% endif %} rounded-pill fs-6">{{ invoice.get_payment_status_display }}</span>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{% url 'billing:invoice_pdf' invoice.id %}" class="btn btn-secondary btn-sm">
+                    <i class="bi bi-download"></i> Download Invoice
+                </a>
+                <span class="badge bg-{% if invoice.payment_status == 'paid' %}success{% elif invoice.payment_status == 'partial' %}primary{% else %}warning{% endif %} rounded-pill fs-6">{{ invoice.get_payment_status_display }}</span>
+            </div>
         </div>
         <div class="card-body">
-            {% comment %} ... Table of items ... {% endcomment %}
+            <h5 class="card-title mb-4">Customer: {{ invoice.order.customer.name }}</h5>
+            
+            {% comment %} --- This is the complete table of items --- {% endcomment %}
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Product</th>
+                            <th class="text-center">Quantity</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in invoice.order.items.all %}
+                        <tr>
+                            <td>{{ item.product.name }}</td>
+                            <td class="text-center">{{ item.quantity }}</td>
+                            <td class="text-end">Rs {{ item.price }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
         <div class="card-footer bg-light">
-            <div class="row">
+            <div class="row gy-4">
                 <div class="col-md-6">
                     <h5>Payment Summary</h5>
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between"><strong>Total Amount:</strong> <span>₹{{ invoice.total }}</span></li>
-                        <li class="list-group-item d-flex justify-content-between"><strong>Amount Paid:</strong> <span>₹{{ invoice.amount_paid }}</span></li>
-                        <li class="list-group-item d-flex justify-content-between fw-bold"><strong>Remaining Balance:</strong> <span>₹{{ invoice.balance }}</span></li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <strong>Total Amount:</strong>
+                            <span>Rs {{ invoice.total }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <strong>Amount Paid:</strong>
+                            <span>Rs {{ invoice.amount_paid }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center fw-bold fs-5">
+                            <strong>Balance Due:</strong>
+                            <span>Rs {{ invoice.balance }}</span>
+                        </li>
                     </ul>
                 </div>
                 <div class="col-md-6">
                     {% if invoice.payment_status != 'paid' %}
-                    <div class="border p-3 rounded h-100">
+                    <div class="border p-3 rounded h-100 bg-white">
                         <h5 class="mb-3">Record a Payment</h5>
                         <form action="{% url 'billing:record_payment' invoice.id %}" method="post">
                             {% csrf_token %}
                             <div class="mb-2">
                                 <label for="payment_amount" class="form-label">Amount</label>
-                                <input type="number" step="0.01" name="payment_amount" id="payment_amount" class="form-control" placeholder="Enter amount" required>
+                                <input type="number" step="0.01" max="{{ invoice.balance }}" name="payment_amount" id="payment_amount" class="form-control" placeholder="Enter amount up to Rs {{ invoice.balance }}" required>
                             </div>
                             <div class="mb-3">
                                 <label for="payment_mode" class="form-label">Payment Mode</label>
@@ -49,7 +85,7 @@
                     </div>
                     {% else %}
                     <div class="text-center p-3 h-100 d-flex flex-column justify-content-center align-items-center bg-success-light rounded">
-                        <h5 class="text-success">This invoice is fully paid.</h5>
+                        <h5 class="text-success"><i class="bi bi-check-circle-fill"></i> This invoice is fully paid.</h5>
                         <p class="mb-0"><strong>Last Payment Mode:</strong> {{ invoice.payment_mode|title }}</p>
                     </div>
                     {% endif %}

@@ -242,3 +242,34 @@ def invoice_list(request):
     """
     invoices = Invoice.objects.all().order_by('-created_at')
     return render(request, 'billing/invoice_list.html', {'invoices': invoices})
+
+
+
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from .models import Invoice
+
+def render_pdf_view(request, invoice_id):
+    """
+    Renders an invoice as a PDF.
+    """
+    invoice = get_object_or_404(Invoice, id=invoice_id)
+    template_path = 'billing/invoice_pdf.html'
+    context = {'invoice': invoice}
+
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="invoice_{invoice.invoice_number}.pdf"'
+
+    # Find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # Create a PDF
+    pisa_status = pisa.CreatePDF(html, dest=response)
+
+    # If error, show an error message
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response

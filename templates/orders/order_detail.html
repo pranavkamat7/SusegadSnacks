@@ -17,7 +17,7 @@
                 </div>
                 <div class="col-md-6 text-md-end">
                     <h5>Order Info</h5>
-                    <p><strong>Total Amount:</strong> ₹{{ order.total_amount }}</p>
+                    <p><strong>Total Amount:</strong> Rs {{ order.total_amount }}</p>
                     <p class="text-muted"><small>Created on: {{ order.created_at|date:"F d, Y, h:i A" }}</small></p>
                 </div>
             </div>
@@ -36,8 +36,7 @@
                             <tr>
                                 <th>Product</th>
                                 <th class="text-center">Quantity</th>
-                                <th class="text-end">Price</th>
-                                <th class="text-end">Subtotal</th>
+                                <th class="text-end">Amount</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -45,8 +44,7 @@
                             <tr>
                                 <td>{{ item.product.name }}</td>
                                 <td class="text-center">{{ item.quantity }}</td>
-                                <td class="text-end">₹{{ item.price }}</td>
-                                <td class="text-end">₹{% widthratio item.quantity 1 item.price %}</td>
+                                <td class="text-end">Rs {{ item.price }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
