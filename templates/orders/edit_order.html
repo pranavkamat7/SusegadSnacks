@@ -23,11 +23,17 @@
       <tbody>
         {% for item in products %}
           <tr>
-            <td>{{ item.product.name }} Rs {{item.product.mrp|floatformat:0}}</td>
-            <td>
+          <td>
+              {{ item.product.name }}
+              <br>
+              <small class="text-muted">
+                  <strong>MRP:</strong> Rs {{ item.product.mrp|floatformat:2 }} | 
+                  <strong>PTR:</strong> Rs {{ item.product.ptr|floatformat:2|default:"N/A" }}
+              </small>
+          </td>            <td>
               <input type="number" name="quantity_{{ item.id }}" value="{{ item.quantity }}" min="0" class="form-control" required>
             </td>
-            <td>Rs {{ item.price|floatformat:2 }}</td>
+            <td>{{ item.price|floatformat:2 }}</td>
           </tr>
         {% endfor %}
       </tbody>

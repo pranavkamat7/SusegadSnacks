@@ -1,5 +1,7 @@
 from django.views.generic import ListView, DetailView, View
 from django.shortcuts import redirect, get_object_or_404
+from django.contrib import messages
+from orders.models import SalesOrder
 from .models import Invoice, Expense, Split
 from .services import BillingService
 from django.db import transaction
@@ -7,7 +9,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.utils import timezone
-
+from decimal import Decimal
 class InvoiceListView(ListView):
     model = Invoice
     template_name = 'billing/invoice_list.html'
@@ -122,3 +124,121 @@ def mark_paid(request, split_id):
         split.save()
         return redirect('billing:expense_list')
     return render(request, 'billing/mark_paid_confirm.html', {'split': split})
+
+
+def generate_invoice(request, order_id):
+    """
+    Generates an invoice for a delivered order.
+    """
+    order = get_object_or_404(SalesOrder, id=order_id)
+
+    # 1. Check if the order is ready to be billed
+    if order.status != 'delivered':
+        messages.error(request, "Invoice can only be generated for delivered orders.")
+        return redirect('orders:order_detail', pk=order_id) # Redirect to your order detail page
+
+    # 2. Check if an invoice already exists
+    if hasattr(order, 'invoice'):
+        messages.info(request, "An invoice for this order already exists.")
+        return redirect('billing:invoice_detail', invoice_id=order.invoice.id)
+
+    # 3. Generate the invoice
+    invoice = Invoice.objects.create(
+        order=order,
+        invoice_number=f"INV-{order.id}-{timezone.now().strftime('%Y%m%d')}",
+        total=order.total_amount
+    )
+
+    # 4. Update order status to 'billed'
+    order.status = 'billed'
+    order.save()
+
+    messages.success(request, f"Invoice {invoice.invoice_number} generated successfully.")
+    return redirect('billing:invoice_detail', invoice_id=invoice.id)
+
+
+def invoice_detail(request, invoice_id):
+    """
+    Displays the details of a single invoice.
+    """
+    invoice = get_object_or_404(Invoice, id=invoice_id)
+    return render(request, 'billing/invoice_detail.html', {'invoice': invoice})
+
+
+def mark_invoice_as_paid(request, invoice_id):
+    """
+    Marks an invoice as paid and records the payment mode.
+    """
+    invoice = get_object_or_404(Invoice, id=invoice_id)
+
+    if request.method == 'POST':
+        payment_mode = request.POST.get('payment_mode')
+        
+        if not payment_mode:
+            messages.error(request, "Please select a payment mode.")
+            return redirect('billing:invoice_detail', invoice_id=invoice.id)
+
+        # Update the invoice status
+        invoice.payment_status = 'paid'
+        invoice.payment_mode = payment_mode
+        invoice.save()
+        
+        messages.success(request, f"Invoice {invoice.invoice_number} has been marked as paid.")
+        return redirect('billing:invoice_detail', invoice_id=invoice.id)
+
+    return redirect('billing:invoice_detail', invoice_id=invoice.id)
+
+
+def record_payment(request, invoice_id):
+    """
+    Records a full or partial payment for an invoice.
+    """
+    invoice = get_object_or_404(Invoice, id=invoice_id)
+
+    if request.method == 'POST':
+        payment_amount_str = request.POST.get('payment_amount')
+        payment_mode = request.POST.get('payment_mode')
+
+        # --- Validation ---
+        if not payment_amount_str or not payment_mode:
+            messages.error(request, "Please provide both payment amount and mode.")
+            return redirect('billing:invoice_detail', invoice_id=invoice.id)
+        
+        try:
+            payment_amount = Decimal(payment_amount_str)
+        except:
+            messages.error(request, "Invalid payment amount entered.")
+            return redirect('billing:invoice_detail', invoice_id=invoice.id)
+
+        if payment_amount <= 0:
+            messages.error(request, "Payment amount must be a positive number.")
+            return redirect('billing:invoice_detail', invoice_id=invoice.id)
+            
+        if payment_amount > invoice.balance:
+            messages.error(request, f"Payment cannot exceed the remaining balance of ₹{invoice.balance}.")
+            return redirect('billing:invoice_detail', invoice_id=invoice.id)
+
+        # --- Update Invoice ---
+        invoice.amount_paid += payment_amount
+        invoice.payment_mode = payment_mode
+
+        if invoice.amount_paid >= invoice.total:
+            invoice.payment_status = 'paid'
+        else:
+            invoice.payment_status = 'partial'
+        
+        invoice.save()
+
+        messages.success(request, f"Payment of ₹{payment_amount} recorded successfully.")
+        return redirect('billing:invoice_detail', invoice_id=invoice.id)
+
+    # Redirect if not a POST request
+    return redirect('billing:invoice_detail', invoice_id=invoice.id)
+
+
+def invoice_list(request):
+    """
+    Displays a list of all invoices.
+    """
+    invoices = Invoice.objects.all().order_by('-created_at')
+    return render(request, 'billing/invoice_list.html', {'invoices': invoices})

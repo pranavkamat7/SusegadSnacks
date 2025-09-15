@@ -82,11 +82,14 @@ if DATABASE_URL:
 else:
     # Fallback for local development (SQLite)
     DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'snackhub',
+        'USER': 'root',
+        'PASSWORD': 'Tejas@9822',
+        'PORT': '3306',
     }
+}
 
 # ------------------------------
 # PASSWORD VALIDATION

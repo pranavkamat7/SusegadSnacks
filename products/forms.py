@@ -3,11 +3,29 @@ from .models import Product
 from brands.models import Brand
 
 class ProductForm(forms.ModelForm):
-    brand = forms.ModelChoiceField(queryset=Brand.objects.all(), required=True)
+    # This explicit field definition is not strictly necessary if you just want a standard dropdown,
+    # but it's good practice for clarity and customization.
+    brand = forms.ModelChoiceField(
+        queryset=Brand.objects.all(),
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-select'}) # Apply Bootstrap class
+    )
 
     class Meta:
         model = Product
-        fields = ['brand', 'name', 'description', 'mrp', 'margin', 'weight_gms', 'is_active']
+        # --- Add 'ptr' to the fields list ---
+        fields = ['brand', 'name', 'description', 'mrp', 'ptr', 'margin', 'weight_gms', 'is_active']
+        
+        # --- (Optional but Recommended) Add widgets for Bootstrap styling ---
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'mrp': forms.NumberInput(attrs={'class': 'form-control'}),
+            'ptr': forms.NumberInput(attrs={'class': 'form-control'}),
+            'margin': forms.NumberInput(attrs={'class': 'form-control'}),
+            'weight_gms': forms.NumberInput(attrs={'class': 'form-control'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
 
 
 class SelectProductsForm(forms.Form):

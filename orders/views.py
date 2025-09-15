@@ -40,7 +40,7 @@ class OrderCreateView(View):
             instances = formset.save(commit=False)
             for item in instances:
                 item.order = order
-                item.price = item.product.mrp * item.quantity
+                item.price = item.product.ptr * item.quantity
                 item.save()
                 total += item.price
 
@@ -94,7 +94,7 @@ class OrderUpdateView(View):
             total_amount = 0
             for item in order_items:
                 item.order = saved_order
-                item.price = item.product.mrp * item.quantity
+                item.price = item.product.ptr * item.quantity
                 item.save()
                 total_amount += item.price
 
@@ -165,7 +165,7 @@ def confirm_order(request):
         total = 0
         for product in products:
             qty = selected_products[str(product.id)]
-            price = product.mrp * qty
+            price = product.ptr * qty
             OrderItem.objects.create(order=order, product=product, quantity=qty, price=price)
             total += price
         order.total_amount = total
@@ -208,7 +208,7 @@ def edit_order(request, pk):
             if str(item.id) in updated_quantities:
                 new_qty = updated_quantities[str(item.id)]
                 item.quantity = new_qty
-                item.price = item.product.mrp * new_qty
+                item.price = item.product.ptr * new_qty
                 item.save()
                 total += item.price
             else:

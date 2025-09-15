@@ -1,13 +1,65 @@
-{% extends 'base.html' %}
-{% block title %}Invoice - {{ invoice.invoice_number }}{% endblock %}
+{% extends "base.html" %}
+{% block title %}Invoice {{ invoice.invoice_number }}{% endblock %}
 
 {% block content %}
-  <h2>Invoice {{ invoice.invoice_number }}</h2>
-  <p><strong>Order ID:</strong> {{ invoice.order.pk }}</p>
-  <p><strong>Total:</strong> ₹{{ invoice.total }}</p>
-  <p><strong>Payment Status:</strong> {{ invoice.payment_status|title }}</p>
-  <p><strong>Payment Mode:</strong> {{ invoice.payment_mode }}</p>
-  <p><small>Created on {{ invoice.created_at|date:"Y-m-d H:i" }}</small></p>
+<div class="container py-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-0">Invoice #{{ invoice.invoice_number }}</h2>
+                <p class="mb-0 text-muted"><small>For Order #{{ invoice.order.id }}</small></p>
+            </div>
+            <span class="badge bg-{% if invoice.payment_status == 'paid' %}success{% elif invoice.payment_status == 'partial' %}primary{% else %}warning{% endif %} rounded-pill fs-6">{{ invoice.get_payment_status_display }}</span>
+        </div>
+        <div class="card-body">
+            {% comment %} ... Table of items ... {% endcomment %}
+        </div>
+        <div class="card-footer bg-light">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Payment Summary</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between"><strong>Total Amount:</strong> <span>₹{{ invoice.total }}</span></li>
+                        <li class="list-group-item d-flex justify-content-between"><strong>Amount Paid:</strong> <span>₹{{ invoice.amount_paid }}</span></li>
+                        <li class="list-group-item d-flex justify-content-between fw-bold"><strong>Remaining Balance:</strong> <span>₹{{ invoice.balance }}</span></li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    {% if invoice.payment_status != 'paid' %}
+                    <div class="border p-3 rounded h-100">
+                        <h5 class="mb-3">Record a Payment</h5>
+                        <form action="{% url 'billing:record_payment' invoice.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="mb-2">
+                                <label for="payment_amount" class="form-label">Amount</label>
+                                <input type="number" step="0.01" name="payment_amount" id="payment_amount" class="form-control" placeholder="Enter amount" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="payment_mode" class="form-label">Payment Mode</label>
+                                <select name="payment_mode" id="payment_mode" class="form-select" required>
+                                    <option value="" disabled selected>Select Mode</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="Credit Card">Credit Card</option>
+                                    <option value="Bank Transfer">Bank Transfer</option>
+                                    <option value="UPI">UPI</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">Record Payment</button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <div class="text-center p-3 h-100 d-flex flex-column justify-content-center align-items-center bg-success-light rounded">
+                        <h5 class="text-success">This invoice is fully paid.</h5>
+                        <p class="mb-0"><strong>Last Payment Mode:</strong> {{ invoice.payment_mode|title }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-  <a href="{% url 'billing:list' %}" class="btn btn-secondary">Back to Invoice List</a>
+<style>
+.bg-success-light { background-color: rgba(25, 135, 84, 0.1); }
+</style>
 {% endblock %}

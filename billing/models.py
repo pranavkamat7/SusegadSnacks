@@ -7,9 +7,23 @@ class Invoice(models.Model):
     order = models.OneToOneField(SalesOrder, on_delete=models.CASCADE)
     invoice_number = models.CharField(max_length=32, unique=True)
     total = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_status = models.CharField(max_length=32, choices=[('unpaid','Unpaid'),('paid','Paid')], default='unpaid')
-    payment_mode = models.CharField(max_length=20, blank=True)
+    
+    # --- New and Updated Fields ---
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    payment_status = models.CharField(
+        max_length=32, 
+        choices=[('unpaid', 'Unpaid'), ('partial', 'Partial'), ('paid', 'Paid')], 
+        default='unpaid'
+    )
+    # --- End of Changes ---
+
+    payment_mode = models.CharField(max_length=20, blank=True) # We'll update this with the last payment mode
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def balance(self):
+        """Calculates the remaining balance."""
+        return self.total - self.amount_paid
 
     def __str__(self):
         return f"Invoice {self.invoice_number} for Order {self.order.pk}"

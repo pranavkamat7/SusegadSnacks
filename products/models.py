@@ -6,6 +6,7 @@ class Product(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     mrp = models.DecimalField(max_digits=8, decimal_places=2)
+    ptr = models.DecimalField(max_digits=8, decimal_places=2,blank=True,null=True)
     margin = models.DecimalField(max_digits=8, decimal_places=2)
     weight_gms = models.PositiveIntegerField()
     is_active = models.BooleanField(default=True)

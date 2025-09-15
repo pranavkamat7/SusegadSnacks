@@ -8,6 +8,7 @@ class SalesOrder(models.Model):
         ('confirmed', 'Confirmed'),
         ('delivered', 'Delivered'),
         ('cancelled', 'Cancelled'),
+        ('billed', 'Billed'), 
     ]
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
     status = models.CharField(max_length=16, choices=STATUS_CHOICES, default='pending')

@@ -2,33 +2,71 @@
 {% block title %}Order Details - #{{ order.pk }}{% endblock %}
 
 {% block content %}
-  <h2>Order #{{ order.pk }}</h2>
-  <p><strong>Customer:</strong> {{ order.customer.name }}</p>
-  <p><strong>Status:</strong> {{ order.status|title }}</p>
-  <p><strong>Total Amount:</strong> ₹{{ order.total_amount }}</p>
-  <p><strong>Remarks:</strong> {{ order.remarks }}</p>
-  <p><small>Created on {{ order.created_at|date:"Y-m-d H:i" }}</small></p>
+<div class="container py-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Order #{{ order.pk }}</h2>
+            <span class="badge bg-primary rounded-pill fs-6">{{ order.get_status_display }}</span>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Customer Details</h5>
+                    <p><strong>Name:</strong> {{ order.customer.name }}</p>
+                    {% comment %} Add other customer details like email or phone if available {% endcomment %}
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <h5>Order Info</h5>
+                    <p><strong>Total Amount:</strong> ₹{{ order.total_amount }}</p>
+                    <p class="text-muted"><small>Created on: {{ order.created_at|date:"F d, Y, h:i A" }}</small></p>
+                </div>
+            </div>
 
-  <h4>Items</h4>
-  {% if order.items.all %}
-  <table class="table table-bordered">
-    <thead>
-      <tr><th>Product</th><th>Quantity</th><th>Price</th></tr>
-    </thead>
-    <tbody>
-      {% for item in order.items.all %}
-      <tr>
-        <td>{{ item.product.name }}</td>
-        <td>{{ item.quantity }}</td>
-        <td>₹{{ item.price }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-    <p>No items in this order.</p>
-  {% endif %}
+            {% if order.remarks %}
+                <div class="alert alert-info">
+                    <strong>Remarks:</strong> {{ order.remarks|linebreaksbr }}
+                </div>
+            {% endif %}
 
-  <a href="{% url 'orders:order_edit' order.pk %}" class="btn btn-primary">Edit</a>
-  <a href="{% url 'orders:list' %}" class="btn btn-secondary">Back to list</a>
+            <h4 class="mt-4">Items</h4>
+            {% if order.items.all %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th class="text-center">Quantity</th>
+                                <th class="text-end">Price</th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items.all %}
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td class="text-center">{{ item.quantity }}</td>
+                                <td class="text-end">₹{{ item.price }}</td>
+                                <td class="text-end">₹{% widthratio item.quantity 1 item.price %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>No items in this order.</p>
+            {% endif %}
+        </div>
+        <div class="card-footer bg-light text-end">
+            <a href="{% url 'orders:list' %}" class="btn btn-secondary">Back to List</a>
+            <a href="{% url 'orders:order_edit' order.pk %}" class="btn btn-primary">Edit Order</a>
+            
+            {% comment %} --- Invoice Generation Logic --- {% endcomment %}
+            {% if order.status == 'delivered' %}
+                <a href="{% url 'billing:generate_invoice' order.id %}" class="btn btn-success">Generate Invoice</a>
+            {% elif order.status == 'billed' %}
+                <a href="{% url 'billing:invoice_detail' order.invoice.id %}" class="btn btn-info">View Invoice</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}

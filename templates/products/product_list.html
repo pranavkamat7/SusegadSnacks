@@ -2,41 +2,67 @@
 {% block title %}Products - SnackHub{% endblock %}
 
 {% block content %}
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Products</h2>
-    <a href="{% url 'products:create' %}" class="btn btn-primary">Add Product</a>
-  </div>
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Products</h2>
+        <a href="{% url 'products:create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Add Product
+        </a>
+    </div>
 
-  {% if products %}
-  <div class="table-responsive">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Brand</th>
-          <th>Name</th>
-          <th>MRP</th>
-          <th>Margin</th>
-          <th>Weight (gms)</th>
-          <th>Active</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for product in products %}
-          <tr>
-            <td>{{ product.brand.name }}</td>
-            <td><a href="{% url 'products:detail' product.pk %}">{{ product.name }}</a></td>
-            <td>₹{{ product.mrp }}</td>
-            <td>₹{{ product.margin }}</td>
-            <td>{{ product.weight_gms }}</td>
-            <td>{{ product.is_active|yesno:"Yes,No" }}</td>
-            <td><a href="{% url 'products:edit' product.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a></td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-     </div>
-  {% else %}
-    <p>No products found.</p>
-  {% endif %}
+    {% if products %}
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Brand</th>
+                            <th>Name</th>
+                            <th class="text-end">MRP</th>
+                            <th class="text-end">PTR</th>
+                            <th class="text-end">Margin</th>
+                            <th class="text-center">Weight (gms)</th>
+                            <th class="text-center">Active</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr>
+                            <td>{{ product.brand.name }}</td>
+                            <td>
+                                <a href="{% url 'products:detail' product.pk %}" class="text-decoration-none">{{ product.name }}</a>
+                            </td>
+                            <td class="text-end">Rs {{ product.mrp }}</td>
+                            <td class="text-end">Rs {{ product.ptr|default:"N/A" }}</td>
+                            <td class="text-end">Rs {{ product.margin }}</td>
+                            <td class="text-center">{{ product.weight_gms }}</td>
+                            <td class="text-center">
+                                {% if product.is_active %}
+                                    <span class="badge bg-success rounded-pill">Yes</span>
+                                {% else %}
+                                    <span class="badge bg-secondary rounded-pill">No</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'products:edit' product.pk %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center p-5 border rounded bg-light">
+        <h4>No Products Found</h4>
+        <p>Get started by adding your first product.</p>
+        <a href="{% url 'products:create' %}" class="btn btn-primary mt-2">Add a Product</a>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

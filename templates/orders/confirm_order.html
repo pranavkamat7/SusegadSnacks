@@ -12,15 +12,22 @@
         <tr>
           <th>Product</th>
           <th>Quantity</th>
-          <th>Price (Rs)</th>
+          <th>PTR (Rs)</th>
         </tr>
       </thead>
       <tbody>
         {% for product in products %}
           <tr>
-            <td>{{ product.name }} Rs {{product.mrp|floatformat:0}}</td>
+            <td>
+                    {{ product.name }}
+                    <br>
+                    <small class="text-muted">
+                        <strong>MRP:</strong> Rs {{ product.mrp|floatformat:2 }} | 
+                        <strong>PTR:</strong> Rs {{ product.ptr|floatformat:2|default:"N/A" }}
+                    </small>
+                </td>  
             <td>{{ quantities|get_item:product.id|stringformat:"s" }}</td>
-            <td>Rs {{ product.mrp|floatformat:0 }}</td>
+            <td>{{ product.ptr|floatformat:0 }}</td>
           </tr>
         {% endfor %}
       </tbody>

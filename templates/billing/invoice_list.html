@@ -1,34 +1,61 @@
 {% extends 'base.html' %}
-{% block title %}Invoices - SnackHub{% endblock %}
+{% block title %}Invoice List - SnackHub{% endblock %}
 
 {% block content %}
-  <h2>Invoices</h2>
-  {% if invoices %}
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Invoice Number</th>
-          <th>Order ID</th>
-          <th>Total</th>
-          <th>Payment Status</th>
-          <th>Payment Mode</th>
-          <th>Created At</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for invoice in invoices %}
-          <tr>
-            <td><a href="{% url 'billing:detail' invoice.pk %}">{{ invoice.invoice_number }}</a></td>
-            <td>{{ invoice.order.pk }}</td>
-            <td>₹{{ invoice.total }}</td>
-            <td>{{ invoice.payment_status|title }}</td>
-            <td>{{ invoice.payment_mode }}</td>
-            <td>{{ invoice.created_at|date:"Y-m-d" }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>No invoices found.</p>
-  {% endif %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">All Invoices</h2>
+        {% comment %} You can add a button here if needed, e.g., for exporting reports {% endcomment %}
+    </div>
+
+    {% if invoices %}
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Invoice #</th>
+                            <th>Customer</th>
+                            <th class="text-end">Total Amount</th>
+                            <th class="text-center">Payment Status</th>
+                            <th>Date Created</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invoice in invoices %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'billing:invoice_detail' invoice.id %}" class="fw-bold text-decoration-none">
+                                    {{ invoice.invoice_number }}
+                                </a>
+                            </td>
+                            <td>{{ invoice.order.customer.name }}</td>
+                            <td class="text-end">₹{{ invoice.total }}</td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill bg-{% if invoice.payment_status == 'paid' %}success{% elif invoice.payment_status == 'partial' %}primary{% else %}warning{% endif %}">
+                                    {{ invoice.get_payment_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ invoice.created_at|date:"F d, Y" }}</td>
+                            <td class="text-end">
+                                <a href="{% url 'billing:invoice_detail' invoice.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center p-5 border rounded bg-light">
+        <h4>No Invoices Found</h4>
+        <p>Invoices will appear here once they are generated from delivered orders.</p>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}
