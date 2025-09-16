@@ -32,7 +32,14 @@
                     <tbody>
                         {% for item in invoice.order.items.all %}
                         <tr>
-                            <td>{{ item.product.name }}</td>
+                            <td>
+                                {{ item.product.name }}
+                                <br>
+                                <small class="text-muted">
+                                    <strong>MRP:</strong> Rs {{ item.product.mrp|floatformat:2 }} | 
+                                    <strong>PTR:</strong> Rs {{ item.product.ptr|floatformat:2|default:"N/A" }}
+                                </small>
+                            </td>  
                             <td class="text-center">{{ item.quantity }}</td>
                             <td class="text-end">Rs {{ item.price }}</td>
                         </tr>

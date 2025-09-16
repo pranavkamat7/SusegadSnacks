@@ -20,25 +20,25 @@
         }
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
-            color: #444;
+            color: #4A4A4A; /* Dark Gray */
             font-size: 10pt;
         }
         /* --- Header & Footer --- */
         .header-table { width: 100%; }
         .company-name {
-            color: #0d47a1; /* Deep Corporate Blue */
+            color: #D32F2F; /* Strong Red */
             font-size: 28pt;
             font-weight: bold;
         }
         .invoice-title {
             font-size: 24pt;
-            color: #666;
+            color: #616161; /* Medium Gray */
             text-align: right;
         }
         .footer {
             text-align: center;
             font-size: 8pt;
-            color: #888;
+            color: #9E9E9E; /* Light Gray */
         }
         /* --- Content --- */
         .details-table {
@@ -52,9 +52,9 @@
         }
         .details-table h2 {
             font-size: 13pt;
-            color: #0d47a1;
+            color: #E64A19; /* Deep Orange */
             margin-bottom: 8px;
-            border-bottom: 2px solid #0d47a1;
+            border-bottom: 2px solid #E64A19;
             padding-bottom: 4px;
         }
         .text-end { text-align: right; }
@@ -66,15 +66,15 @@
         .items-table th, .items-table td {
             padding: 12px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #FFCCBC; /* Light Red/Orange */
         }
         .items-table thead tr {
-            background-color: #0d47a1;
+            background-color: #E64A19; /* Deep Orange */
             color: #fff;
             font-size: 11pt;
         }
         .items-table tbody tr:nth-child(even) {
-            background-color: #f8f9fa;
+            background-color: #FFF3E0; /* Very Light Orange */
         }
         
         .summary-table {
@@ -89,8 +89,8 @@
         .summary-table .total {
             font-weight: bold;
             font-size: 14pt;
-            background-color: #e3f2fd; /* Light Blue */
-            color: #0d47a1;
+            background-color: #FFCCBC; /* Light Red/Orange */
+            color: #BF360C; /* Deepest Orange */
         }
     </style>
 </head>
@@ -99,7 +99,7 @@
     <div id="header_content">
         <table class="header-table">
             <tr>
-                <td><div class="company-name">Sushegad Foods</div></td>
+                <td><div class="company-name">Sushegad Snacks</div></td>
                 <td><div class="invoice-title">INVOICE</div></td>
             </tr>
         </table>
@@ -108,7 +108,7 @@
     <!-- ======================= FOOTER ======================= -->
     <div id="footer_content" class="footer">
         <p>Thank you for your business!</p>
-        <p>Sushegad Foods | Canacona, Goa, India </p>
+        <p>Sushegad Snacks | Canacona, Goa, India</p>
     </div>
 
     <!-- ======================= MAIN CONTENT ======================= -->
@@ -118,7 +118,6 @@
                 <td>
                     <h2>Billed To:</h2>
                     <strong>{{ invoice.order.customer.name }}</strong><br>
-                    {% comment %} Fetching the primary address of the customer {% endcomment %}
                     {% with primary_address=invoice.order.customer.addresses.first %}
                         {% if primary_address %}
                             {{ primary_address.address_line1 }}<br>
@@ -132,7 +131,7 @@
                 <td class="text-end">
                     <h2>Invoice Details:</h2>
                     <strong>Invoice #:</strong> {{ invoice.invoice_number }}<br>
-                    <strong>Order ID:</strong> #{{ invoice.order.id }}<br>
+                    {% comment %} <strong>Order ID:</strong> #{{ invoice.order.id }}<br> {% endcomment %}
                     <strong>Date:</strong> {{ invoice.created_at|date:"F d, Y" }}
                 </td>
             </tr>
@@ -149,7 +148,14 @@
             <tbody>
                 {% for item in invoice.order.items.all %}
                 <tr>
-                    <td>{{ item.product.name }}</td>
+                    <td>
+                        {{ item.product.name }}
+                        <br>
+                        <small class="text-muted">
+                            <strong>MRP:</strong> Rs {{ item.product.mrp|floatformat:2 }} | 
+                            <strong>PTR:</strong> Rs {{ item.product.ptr|floatformat:2|default:"N/A" }}
+                        </small>
+                    </td> 
                     <td class="text-end">{{ item.quantity }}</td>
                     <td class="text-end">Rs {{ item.price }}</td>
                 </tr>
