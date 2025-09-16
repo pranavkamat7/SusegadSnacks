@@ -6,96 +6,31 @@
     <style>
         @page {
             size: a4 portrait;
-            @frame header_frame {
-                -pdf-frame-content: header_content;
-                left: 30pt; right: 30pt; top: 30pt; height: 100pt;
-            }
-            @frame content_frame {
-                left: 30pt; right: 30pt; top: 150pt; bottom: 80pt;
-            }
-            @frame footer_frame {
-                -pdf-frame-content: footer_content;
-                left: 30pt; right: 30pt; bottom: 30pt; height: 50pt;
-            }
+            @frame header_frame { -pdf-frame-content: header_content; left: 30pt; right: 30pt; top: 30pt; height: 100pt; }
+            @frame content_frame { left: 30pt; right: 30pt; top: 150pt; bottom: 80pt; }
+            @frame footer_frame { -pdf-frame-content: footer_content; left: 30pt; right: 30pt; bottom: 30pt; height: 50pt; }
         }
-        body {
-            font-family: 'Helvetica', 'Arial', sans-serif;
-            color: #4A4A4A; /* Dark Gray */
-            font-size: 10pt;
-        }
-        /* --- Header & Footer --- */
+        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #4A4A4A; font-size: 10pt; }
         .header-table { width: 100%; }
-        .company-name {
-            color: #D32F2F; /* Strong Red */
-            font-size: 28pt;
-            font-weight: bold;
-        }
-        .invoice-title {
-            font-size: 24pt;
-            color: #616161; /* Medium Gray */
-            text-align: right;
-        }
-        .footer {
-            text-align: center;
-            font-size: 8pt;
-            color: #9E9E9E; /* Light Gray */
-        }
-        /* --- Content --- */
-        .details-table {
-            width: 100%;
-            margin-bottom: 30px;
-            font-size: 11pt;
-        }
-        .details-table td {
-            vertical-align: top;
-            width: 50%;
-        }
-        .details-table h2 {
-            font-size: 13pt;
-            color: #E64A19; /* Deep Orange */
-            margin-bottom: 8px;
-            border-bottom: 2px solid #E64A19;
-            padding-bottom: 4px;
-        }
+        .company-name { color: #D32F2F; font-size: 28pt; font-weight: bold; }
+        .invoice-title { font-size: 24pt; color: #616161; text-align: right; }
+        .footer { text-align: center; font-size: 8pt; color: #9E9E9E; }
+        .details-table { width: 100%; margin-bottom: 30px; font-size: 11pt; }
+        .details-table td { vertical-align: top; width: 50%; }
+        .details-table h2 { font-size: 13pt; color: #E64A19; margin-bottom: 8px; border-bottom: 2px solid #E64A19; padding-bottom: 4px; }
         .text-end { text-align: right; }
-        
-        .items-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .items-table th, .items-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #FFCCBC; /* Light Red/Orange */
-        }
-        .items-table thead tr {
-            background-color: #E64A19; /* Deep Orange */
-            color: #fff;
-            font-size: 11pt;
-        }
-        .items-table tbody tr:nth-child(even) {
-            background-color: #FFF3E0; /* Very Light Orange */
-        }
-        
-        .summary-table {
-            width: 50%;
-            margin-left: 50%;
-            margin-top: 30px;
-            font-size: 11pt;
-        }
-        .summary-table td {
-            padding: 10px;
-        }
-        .summary-table .total {
-            font-weight: bold;
-            font-size: 14pt;
-            background-color: #FFCCBC; /* Light Red/Orange */
-            color: #BF360C; /* Deepest Orange */
-        }
+        .text-center { text-align: center; }
+        .items-table { width: 100%; border-collapse: collapse; }
+        .items-table th, .items-table td { padding: 10px; text-align: left; border-bottom: 1px solid #FFCCBC; }
+        .items-table thead tr { background-color: #E64A19; color: #fff; font-size: 11pt; }
+        .items-table tbody tr:nth-child(even) { background-color: #FFF3E0; }
+        .items-table tfoot td { font-weight: bold; }
+        .items-table .summary-label { text-align: right; }
+        .items-table .summary-value { text-align: right; background-color: #f8f9fa; }
+        .items-table .total-balance { font-size: 12pt; background-color: #FFCCBC; color: #BF360C; }
     </style>
 </head>
 <body>
-    <!-- ======================= HEADER ======================= -->
     <div id="header_content">
         <table class="header-table">
             <tr>
@@ -105,13 +40,11 @@
         </table>
     </div>
 
-    <!-- ======================= FOOTER ======================= -->
     <div id="footer_content" class="footer">
         <p>Thank you for your business!</p>
         <p>Sushegad Snacks | Canacona, Goa, India</p>
     </div>
 
-    <!-- ======================= MAIN CONTENT ======================= -->
     <div id="content_frame">
         <table class="details-table">
             <tr>
@@ -120,18 +53,15 @@
                     <strong>{{ invoice.order.customer.name }}</strong><br>
                     {% with primary_address=invoice.order.customer.addresses.first %}
                         {% if primary_address %}
-                            {{ primary_address.address_line1 }}<br>
-                            {% if primary_address.address_line2 %}{{ primary_address.address_line2 }}<br>{% endif %}
+                            {{ primary_address.address_line1 }}{% if primary_address.address_line2 %}, {{ primary_address.address_line2 }}{% endif %}<br>
                             {{ primary_address.city }}, {{ primary_address.state }} - {{ primary_address.pincode }}<br>
                         {% endif %}
                     {% endwith %}
-                    Phone: {{ invoice.order.customer.phone }}<br>
-                    Email: {{ invoice.order.customer.email }}
+                    Phone: {{ invoice.order.customer.phone }}
                 </td>
                 <td class="text-end">
                     <h2>Invoice Details:</h2>
                     <strong>Invoice #:</strong> {{ invoice.invoice_number }}<br>
-                    {% comment %} <strong>Order ID:</strong> #{{ invoice.order.id }}<br> {% endcomment %}
                     <strong>Date:</strong> {{ invoice.created_at|date:"F d, Y" }}
                 </td>
             </tr>
@@ -141,8 +71,9 @@
             <thead>
                 <tr>
                     <th>Product</th>
-                    <th class="text-end">Quantity</th>
-                    <th class="text-end">Price</th>
+                    <th class="text-center">Quantity</th>
+                    <th class="text-center">Weight (gms)</th>
+                    <th class="text-end">Total</th>
                 </tr>
             </thead>
             <tbody>
@@ -151,31 +82,32 @@
                     <td>
                         {{ item.product.name }}
                         <br>
-                        <small class="text-muted">
-                            <strong>MRP:</strong> Rs {{ item.product.mrp|floatformat:2 }} | 
-                            <strong>PTR:</strong> Rs {{ item.product.ptr|floatformat:2|default:"N/A" }}
+                        <small style="color: #777;">
+                            MRP: Rs {{ item.product.mrp|floatformat:2 }} | PTR: Rs {{ item.product.ptr|floatformat:2|default:"N/A" }}
                         </small>
-                    </td> 
-                    <td class="text-end">{{ item.quantity }}</td>
-                    <td class="text-end">Rs {{ item.price }}</td>
+                    </td>
+                    <td class="text-center">{{ item.quantity }}</td>
+                    <td class="text-center">{% widthratio item.quantity 1 item.product.weight_gms %}</td>
+                    <td class="text-end">Rs {{item.price }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
-        </table>
-
-        <table class="summary-table">
-            <tr>
-                <td>Subtotal</td>
-                <td class="text-end">Rs {{ invoice.total }}</td>
-            </tr>
-            <tr>
-                <td>Amount Paid</td>
-                <td class="text-end">Rs {{ invoice.amount_paid }}</td>
-            </tr>
-            <tr class="total">
-                <td>Balance Due</td>
-                <td class="text-end">Rs {{ invoice.balance }}</td>
-            </tr>
+            <tfoot>
+                <tr>
+                    <td style="font-weight: bold; text-align: left;">Total</td>
+                    <td class="text-center">{{ total_quantity }}</td>
+                    <td class="text-center">{{ total_weight }}</td>
+                    <td class="text-end" style="background-color: #e9ecef;">Rs {{ invoice.total|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="summary-label">Amount Paid:</td>
+                    <td class="summary-value">Rs {{ invoice.amount_paid|floatformat:2 }}</td>
+                </tr>
+                <tr class="total-balance">
+                    <td colspan="3" class="summary-label">Balance Due:</td>
+                    <td class="summary-value">Rs {{ invoice.balance|floatformat:2 }}</td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </body>

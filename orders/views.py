@@ -60,6 +60,26 @@ class OrderDetailView(DetailView):
     template_name = 'orders/order_detail.html'
     context_object_name = 'order'
 
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+
+        # Get the order object from the context
+        order = context['order']
+
+        # Calculate totals for the table footer
+        total_weight = 0
+        total_quantity = 0
+        for item in order.items.all():
+            total_weight += (item.product.weight_gms * item.quantity)
+            total_quantity += item.quantity
+
+        # Add the calculated totals to the context
+        context['total_weight'] = total_weight
+        context['total_quantity'] = total_quantity
+        
+        return context
+
 
 class OrderUpdateView(View):
     template_name = 'orders/order_form.html'
@@ -157,19 +177,48 @@ def confirm_order(request):
         return redirect('orders:select_customer')
 
     customer = get_object_or_404(Customer, pk=request.session['customer_id'])
-    selected_products = request.session['selected_products']
-    products = Product.objects.filter(id__in=selected_products.keys())
+    selected_products_data = request.session['selected_products']
+    products = Product.objects.filter(id__in=selected_products_data.keys())
+
+    # --- Prepare data for the template ---
+    order_items = []
+    grand_total_amount = 0
+    grand_total_weight = 0
+    grand_total_quantity = 0
+
+    for product in products:
+        quantity = int(selected_products_data.get(str(product.id), 0))
+        if quantity > 0:
+            total_price = product.ptr * quantity
+            total_weight = product.weight_gms * quantity
+
+            order_items.append({
+                'product': product,
+                'quantity': quantity,
+                'total_price': total_price,
+                'total_weight': total_weight,
+            })
+            grand_total_amount += total_price
+            grand_total_weight += total_weight
+            grand_total_quantity += quantity
 
     if request.method == 'POST':
-        order = SalesOrder.objects.create(customer=customer, status='Pending', remarks='')
-        total = 0
-        for product in products:
-            qty = selected_products[str(product.id)]
-            price = product.ptr * qty
-            OrderItem.objects.create(order=order, product=product, quantity=qty, price=price)
-            total += price
-        order.total_amount = total
-        order.save()
+        # Create the SalesOrder first
+        order = SalesOrder.objects.create(
+            customer=customer, 
+            status='pending', 
+            total_amount=grand_total_amount,
+            remarks=''
+        )
+        
+        # Create OrderItem for each item in the prepared list
+        for item_data in order_items:
+            OrderItem.objects.create(
+                order=order, 
+                product=item_data['product'], 
+                quantity=item_data['quantity'], 
+                price=item_data['product'].ptr # Save price per unit
+            )
 
         # Clear session data
         request.session.pop('customer_id', None)
@@ -177,16 +226,29 @@ def confirm_order(request):
 
         return redirect('orders:order_success', pk=order.pk)
 
-    return render(request, 'orders/confirm_order.html', {
+    context = {
         'customer': customer,
-        'products': products,
-        'quantities': selected_products,
-    })
+        'order_items': order_items,
+        'grand_total_amount': grand_total_amount,
+        'grand_total_weight': grand_total_weight,
+        'grand_total_quantity': grand_total_quantity,
+    }
+    return render(request, 'orders/confirm_order.html', context)
 
 # Order creation success page
 def order_success(request, pk):
     order = get_object_or_404(SalesOrder, pk=pk)
-    return render(request, 'orders/order_success.html', {'order': order})
+
+    # Calculate total weight for the summary
+    total_weight = 0
+    for item in order.items.all():
+        total_weight += (item.product.weight_gms * item.quantity)
+
+    context = {
+        'order': order,
+        'total_weight': total_weight,
+    }
+    return render(request, 'orders/order_success.html', context)
 
 # Edit existing order — shows and allows update of order items and quantities
 def edit_order(request, pk):

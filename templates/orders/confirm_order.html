@@ -1,41 +1,61 @@
 {% extends "base.html" %}
-{% load form_tags%}
+{% load form_tags %}
+
 {% block content %}
-<div class="container my-5" style="max-width: 720px;">
-  <h2 class="mb-4 text-center">Confirm Sales Order</h2>
-  <h3>Customer</h3>
-  <p class="fs-5 mb-4">{{ customer.name }}</p>
-  <h3>Products</h3>
-  <div class="table-responsive">
-    <table class="table table-striped table-bordered align-middle">
-      <thead class="table-light">
-        <tr>
-          <th>Product</th>
-          <th>Quantity</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for product in products %}
-          <tr>
-            <td>
-                    {{ product.name }}
-                    <br>
-                    <small class="text-muted">
-                        <strong>MRP:</strong> Rs {{ product.mrp|floatformat:2 }} | 
-                        <strong>PTR:</strong> Rs {{ product.ptr|floatformat:2|default:"N/A" }}
-                    </small>
-                </td>  
-            <td>{{ quantities|get_item:product.id|stringformat:"s" }}</td>
-            <td >₹{% widthratio quantities|get_item:product.id|stringformat:"s" 1 product.ptr %}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+<div class="container my-5" style="max-width: 800px;">
+  <div class="card shadow-sm">
+    <div class="card-header bg-light">
+      <h2 class="mb-0 text-center">Confirm Sales Order</h2>
+    </div>
+    <div class="card-body p-4">
+      <h5 class="card-title">Customer Details</h5>
+      <p class="fs-5 mb-4">{{ customer.name }}</p>
+      
+      <h5 class="card-title">Order Summary</h5>
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Product</th>
+              <th class="text-center">Quantity</th>
+              <th class="text-center">Weight (gms)</th>
+              <th class="text-end">Total Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in order_items %}
+              <tr>
+                <td>
+                  {{ item.product.name }}
+                  <br>
+                  <small class="text-muted">
+                      <strong>MRP:</strong> Rs {{ item.product.mrp|floatformat:2 }} | 
+                      <strong>PTR:</strong> Rs {{ item.product.ptr|floatformat:2|default:"N/A" }}
+                  </small>
+                </td>
+                <td class="text-center">{{ item.quantity }}</td>
+                <td class="text-center">{{ item.total_weight }}</td>
+                <td class="text-end">Rs {{ item.total_price|floatformat:2 }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr class="fw-bold">
+              <td>Total</td>
+              <td class="text-center">{{ grand_total_quantity }}</td>
+              <td class="text-center">{{ grand_total_weight }}</td>
+              <td class="text-end" style="background-color: #e9ecef;">Rs {{ grand_total_amount|floatformat:2 }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      
+      <form method="post" class="mt-4 text-center">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success btn-lg px-5">Confirm & Create Order</button>
+        <a href="{% url 'orders:select_products' %}" class="btn btn-secondary btn-lg">Go Back</a>
+      </form>
+    </div>
   </div>
-  <form method="post" class="mt-4 text-center">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-success btn-lg px-5">Confirm Order</button>
-  </form>
 </div>
 {% endblock %}

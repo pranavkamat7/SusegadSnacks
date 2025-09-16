@@ -159,10 +159,25 @@ def generate_invoice(request, order_id):
 
 def invoice_detail(request, invoice_id):
     """
-    Displays the details of a single invoice.
+    Displays the details of a single invoice and calculates item totals.
     """
     invoice = get_object_or_404(Invoice, id=invoice_id)
-    return render(request, 'billing/invoice_detail.html', {'invoice': invoice})
+    
+    # Calculate total quantity and weight for the table footer
+    total_quantity = 0
+    total_weight = 0
+    for item in invoice.order.items.all():
+        total_quantity += item.quantity
+        # Calculate total weight by multiplying item weight by its quantity
+        total_weight += (item.product.weight_gms * item.quantity)
+        
+    context = {
+        'invoice': invoice,
+        'total_quantity': total_quantity,
+        'total_weight': total_weight,
+    }
+    
+    return render(request, 'billing/invoice_detail.html', context)
 
 
 def mark_invoice_as_paid(request, invoice_id):
@@ -252,11 +267,24 @@ from .models import Invoice
 
 def render_pdf_view(request, invoice_id):
     """
-    Renders an invoice as a PDF.
+    Renders an invoice as a PDF, including calculated totals.
     """
     invoice = get_object_or_404(Invoice, id=invoice_id)
+    
+    # Calculate total quantity and weight for the PDF context
+    total_quantity = 0
+    total_weight = 0
+    for item in invoice.order.items.all():
+        total_quantity += item.quantity
+        total_weight += (item.product.weight_gms * item.quantity)
+
+    # Prepare the context for the template
     template_path = 'billing/invoice_pdf.html'
-    context = {'invoice': invoice}
+    context = {
+        'invoice': invoice,
+        'total_quantity': total_quantity,
+        'total_weight': total_weight,
+    }
 
     # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')

@@ -1,22 +1,53 @@
 {% extends "base.html" %}
+
 {% block content %}
-<div class="container my-5" style="max-width: 600px;">
-  <h2 class="text-success mb-4 text-center">Sales Order Created Successfully!</h2>
-  <p class="fs-5 text-center">
-    Order <strong>#{{ order.pk }}</strong> for <strong>{{ order.customer }}</strong>
-  </p>
-  <ul class="list-group mb-4">
-    {% for item in order.orderitem_set.all %}
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        {{ item.product.name }} x {{ item.quantity }}
-        <span class="badge bg-primary rounded-pill">₹{{ item.price }}</span>
-      </li>
-    {% endfor %}
-  </ul>
-  <p class="fs-4 fw-bold text-end">Total: Rs{{ order.total_amount }}</p>
-  <div class="d-flex justify-content-center gap-3 mt-4">
-    <a href="{% url 'orders:order_edit' order.pk %}" class="btn btn-warning btn-lg">Edit Order</a>
-    <a href="{% url 'orders:list' %}" class="btn btn-secondary btn-lg">Back to Orders List</a>
-  </div>
+<div class="container my-5" style="max-width: 700px;">
+    <div class="card shadow-sm text-center border-success">
+        <div class="card-header bg-success text-white">
+            <h2 class="mb-0">Order Created Successfully!</h2>
+        </div>
+        <div class="card-body p-4">
+            <p class="fs-5">
+                Order <strong>#{{ order.pk }}</strong> for customer <strong>{{ order.customer.name }}</strong> has been created.
+            </p>
+            <hr>
+            
+            <h5 class="mt-4">Order Summary</h5>
+            <ul class="list-group list-group-flush mb-4 text-start">
+                {% for item in order.items.all %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        {{ item.product.name }}
+                        <br>
+                        <small class="text-muted">
+                            {{ item.quantity }} units &times; {{ item.product.weight_gms }} gms/unit
+                        </small>
+                    </div>
+                    <span class="fw-bold">Rs {% widthratio item.quantity 1 item.product.ptr %}</span>
+                </li>
+                {% endfor %}
+            </ul>
+
+            <div class="d-flex justify-content-end">
+                <div style="min-width: 250px;">
+                    <div class="d-flex justify-content-between">
+                        <span>Total Weight:</span>
+                        <strong>{{ total_weight }} gms</strong>
+                    </div>
+                    <div class="d-flex justify-content-between fs-4 fw-bold mt-2">
+                        <span>Total Amount:</span>
+                        <strong>Rs {{ order.total_amount|floatformat:2 }}</strong>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="card-footer bg-light">
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'orders:detail' order.pk %}" class="btn btn-primary btn-lg">View Order Details</a>
+                <a href="{% url 'orders:list' %}" class="btn btn-secondary btn-lg">Back to Orders</a>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
