@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.utils import timezone
 from decimal import Decimal
+from django.db.models import Sum, Q
 class InvoiceListView(ListView):
     model = Invoice
     template_name = 'billing/invoice_list.html'
@@ -30,8 +31,26 @@ class GenerateInvoiceView(View):
 
 @login_required
 def expense_list(request):
-    expenses = Expense.objects.filter(paid_by=request.user).order_by('-date_incurred')
-    return render(request, 'billing/expense_list.html', {'expenses': expenses})
+    # Get all expenses where the current user is the one who paid
+    expenses = Expense.objects.all().order_by('-date_incurred')
+
+    # --- Calculate the expense summary ---
+    # We want to get the total amount each user owes from the splits
+    expense_summary = Split.objects.filter(
+        expense__in=expenses
+    ).values(
+        'user__username' # Group by the user in the split
+    ).annotate(
+        total_share=Sum('amount'),
+        total_paid=Sum('amount', filter=Q(is_paid=True)),
+        total_pending=Sum('amount', filter=Q(is_paid=False))
+    ).order_by('user__username')
+
+    context = {
+        'expenses': expenses,
+        'expense_summary': expense_summary,
+    }
+    return render(request, 'billing/expense_list.html', context)
 
 
 @login_required

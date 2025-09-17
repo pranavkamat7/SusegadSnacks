@@ -1,60 +1,68 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container my-5" style="max-width: 600px;">
-  <h2 class="mb-4 text-center">Edit Sales Order #{{ order.pk }}</h2>
-  <form method="post" class="needs-validation" novalidate>
-    {% csrf_token %}
-    <div class="mb-4">
-    <label for="status" class="form-label">Order Status</label>
-    <select id="status" name="status" class="form-select" required>
-      {% for value, label in status_choices %}
-        <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>{{ label }}</option>
-      {% endfor %}
-    </select>
-  </div>
-    <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th>Product</th> 
-          <th>Quantity</th>
-          <th>Price (Rs)</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in products %}
-          <tr>
-          <td>
-              {{ item.product.name }}
-              <br>
-              <small class="text-muted">
-                  <strong>MRP:</strong> Rs {{ item.product.mrp|floatformat:2 }} | 
-                  <strong>PTR:</strong> Rs {{ item.product.ptr|floatformat:2|default:"N/A" }}
-              </small>
-          </td>            <td>
-              <input type="number" name="quantity_{{ item.id }}" value="{{ item.quantity }}" min="0" class="form-control" required>
-            </td>
-            <td>{{ item.price|floatformat:2 }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <button type="submit" class="btn btn-primary w-100 mt-4">Update Order</button>
-  </form>
-</div>
+<div class="container my-5" style="max-width: 800px;">
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h2 class="mb-0 text-center">Edit Sales Order #{{ order.pk }}</h2>
+        </div>
+        <div class="card-body p-4">
+            <form method="post">
+                {% csrf_token %}
 
-<script>
-(() => {
-  'use strict'
-  const forms = document.querySelectorAll('.needs-validation')
-  Array.from(forms).forEach(form => {
-    form.addEventListener('submit', event => {
-      if (!form.checkValidity()) {
-        event.preventDefault()
-        event.stopPropagation()
-      }
-      form.classList.add('was-validated')
-    }, false)
-  })
-})()
-</script>
+                <!-- Order Status -->
+                <div class="mb-4">
+                    <label for="status" class="form-label fw-bold">Order Status</label>
+                    <select id="status" name="status" class="form-select">
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <hr>
+
+                <!-- Order Items Formset -->
+                <h5 class="mb-3">Order Items</h5>
+                {{ formset.management_form }}
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 60%;">Product</th>
+                                <th class="text-center">Quantity</th>
+                                <th class="text-center">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for form in formset %}
+                                <tr>
+                                    <td>
+                                        {{ form.id }} {# Important hidden field #}
+                                        {{ form.product }}
+                                        {% if form.product.errors %}<div class="text-danger small mt-1">{{ form.product.errors.as_text }}</div>{% endif %}
+                                    </td>
+                                    <td>
+                                        {{ form.quantity }}
+                                        {% if form.quantity.errors %}<div class="text-danger small mt-1">{{ form.quantity.errors.as_text }}</div>{% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if form.instance.pk %}
+                                            <div class="form-check d-flex justify-content-center">
+                                                {{ form.DELETE }}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">Update Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

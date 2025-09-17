@@ -1,50 +1,104 @@
 {% extends "base.html" %}
 {% load form_tags %}
-{% block title %}My Expenses | We-eat{% endblock %}
+{% block title %}My Expenses | SnackHub{% endblock %}
 
 {% block content %}
-<h2 style="color: var(--accent-color); margin-bottom: 24px;">My Expenses</h2>
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">My Expenses</h2>
+        <a href="{% url 'billing:add_expense' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Add Expense
+        </a>
+    </div>
 
-<a href="{% url 'billing:add_expense' %}" class="btn btn-primary" style="margin-bottom:15px;">Add Expense</a>
+    <!-- Expense List Card -->
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Expense Details</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Description</th>
+                            <th>Total Amount</th>
+                            <th>Date</th>
+                            <th>Splits</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in expenses %}
+                        <tr>
+                            <td>{{ expense.description }}</td>
+                            <td>{{ expense.amount|lakhcomma }}</td>
+                            <td>{{ expense.date_incurred|date:"d M, Y" }}</td>
+                            <td>
+                                <ul class="list-unstyled mb-0">
+                                    {% for split in expense.splits.all %}
+                                    <li class="d-flex justify-content-between align-items-center py-1">
+                                        <span>{{ split.user.get_full_name|default:split.user.username }}: {{ split.amount|lakhcomma }}</span>
+                                        <div class="d-flex align-items-center">
+                                            {% if split.is_paid %}
+                                                <span class="badge bg-success">Paid</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">Unpaid</span>
+                                                
+                                                {% comment %} --- This is the corrected block --- {% endcomment %}
+                                                {% if split.user == request.user %}
+                                                    <a href="{% url 'billing:mark_paid' split.id %}" class="btn btn-sm btn-outline-success ms-2">Mark Paid</a>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center p-4">You haven't recorded any expenses yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-<div class="table-responsive">
-  <table class="table table-striped">
-      <thead>
-          <tr>
-              <th>Description</th>
-              <th>Amount</th>
-              <th>Date</th>
-              <th>Splits</th>
-          </tr>
-      </thead>
-      <tbody>
-          {% for expense in expenses %}
-          <tr>
-              <td>{{ expense.description }}</td>
-              <td>{{ expense.amount|lakhcomma }}</td>
-              <td>{{ expense.date_incurred }}</td>
-              <td>
-                  <ul>
-                      {% for split in expense.splits.all %}
-                    <li>
-                        {{ split.user.get_full_name|default:split.user.username }}: {{ split.amount|lakhcomma }}
-                        {% if split.is_paid %}
-                        <span class="text-success">(Paid on {{ split.paid_date }})</span>
-                        {% else %}
-                        <span class="text-warning">(Unpaid)</span>
-                        {% if split.user == request.user %}
-                            <a href="{% url 'billing:mark_paid' split.id %}">Mark as Paid</a>
-                        {% endif %}
-                        {% endif %}
-                    </li>
-                    {% endfor %}
-                  </ul>
-              </td>
-          </tr>
-          {% empty %}
-          <tr><td colspan="4" style="text-align:center;">No expenses found.</td></tr>
-          {% endfor %}
-      </tbody>
-  </table>
+    <!-- Expense Summary Card -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Expense Summary</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>User</th>
+                            <th class="text-end">Total Share</th>
+                            <th class="text-end">Amount Paid</th>
+                            <th class="text-end">Amount Pending</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for summary in expense_summary %}
+                        <tr>
+                            <td>{{ summary.user__username }}</td>
+                            <td class="text-end">Rs {{ summary.total_share|default:0|floatformat:2 }}</td>
+                            <td class="text-end text-success">Rs {{ summary.total_paid|default:0|floatformat:2 }}</td>
+                            <td class="text-end text-danger fw-bold">Rs {{ summary.total_pending|default:0|floatformat:2 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center p-4">No summary data available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

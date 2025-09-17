@@ -269,44 +269,61 @@ def order_success(request, pk):
     return render(request, 'orders/order_success.html', context)
 
 # Edit existing order — shows and allows update of order items and quantities
+from django.forms import modelformset_factory
+from django import forms
 def edit_order(request, pk):
     order = get_object_or_404(SalesOrder, pk=pk)
-    products = order.items.all()
+    
+    OrderItemFormSet = modelformset_factory(
+        OrderItem,
+        fields=('product', 'quantity'),
+        extra=1,
+        can_delete=True,
+        widgets={
+            'product': forms.Select(attrs={'class': 'form-select'}),
+            'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
+        }
+    )
 
     if request.method == 'POST':
-        # Update quantities
-        updated_quantities = {}
-        for key, val in request.POST.items():
-            if key.startswith('quantity_') and val.isdigit():
-                item_id = key.split('_')[1]
-                qty = int(val)
-                updated_quantities[item_id] = qty
+        formset = OrderItemFormSet(request.POST, queryset=order.items.all())
+        
+        if formset.is_valid():
+            instances = formset.save(commit=False)
+            
+            for instance in instances:
+                # This ensures newly added items are linked to the current order
+                if not instance.order_id:
+                    instance.order = order
+                # Set the price per unit at the time of saving
+                instance.price = instance.product.ptr
+                instance.save()
+            
+            for obj in formset.deleted_objects:
+                obj.delete()
 
-        # Update total price for items
-        total = 0
-        for item in products:
-            if str(item.id) in updated_quantities:
-                new_qty = updated_quantities[str(item.id)]
-                item.quantity = new_qty
-                item.price = item.product.ptr * new_qty
-                item.save()
-                total += item.price
-            else:
-                total += item.price  # unchanged if not in POST
+            order.total_amount = sum(item.price * item.quantity for item in order.items.all())
+            order.status = request.POST.get('status', order.status)
+            order.save()
+            
+            return redirect('orders:detail', pk=order.pk)
+    else:
+        # GET request logic
+        formset = OrderItemFormSet(queryset=order.items.all())
+        
+        # --- This is the key logic to filter the dropdown ---
+        # Get a list of product IDs already in this order
+        existing_product_ids = order.items.values_list('product_id', flat=True)
+        
+        # The 'extra' form is the last one in the formset.
+        # We will modify its 'product' field's queryset.
+        if formset.forms:
+            last_form = formset.forms[-1]
+            last_form.fields['product'].queryset = Product.objects.exclude(id__in=existing_product_ids)
 
-        # Update SalesOrder status from POST data
-        new_status = request.POST.get('status')
-        if new_status and new_status != order.status:
-            order.status = new_status
-
-        order.total_amount = total
-        order.save()
-        return redirect('orders:order_success', pk=order.pk)
-
-    # If GET, pass available statuses to template (assuming SalesOrder.STATUS_CHOICES exists)
-    status_choices = getattr(order, 'STATUS_CHOICES', [])
-    return render(request, 'orders/edit_order.html', {
+    context = {
         'order': order,
-        'products': products,
-        'status_choices': status_choices,
-    })
+        'formset': formset,
+        'status_choices': SalesOrder.STATUS_CHOICES,
+    }
+    return render(request, 'orders/edit_order.html', context)
