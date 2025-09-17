@@ -1,29 +1,114 @@
-{% extends 'base.html' %}
-{% block title %}Sales Report - SnackHub{% endblock %}
+{% extends "base.html" %}
+{% block title %}Sales Report{% endblock %}
 
 {% block content %}
-  <h2>Sales Report</h2>
+<div class="container py-5">
+    <!-- Header and Date Filter -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Sales Report for {{ selected_month|date:"F Y" }}</h2>
+        <form method="get" class="d-flex gap-2">
+            <input type="month" name="month" class="form-control" value="{{ month_filter_value }}">
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+    </div>
 
-  <p><strong>Total Sales:</strong> ₹{{ sales_stats.total_sales }}</p>
-  <p><strong>Total Orders:</strong> {{ sales_stats.total_orders }}</p>
+    <!-- Key Metrics Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-3 col-md-6">
+            <div class="card text-center h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Total Sales</h5>
+                    <p class="card-text fs-3 fw-bold">Rs {{ total_sales|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card text-center text-white bg-success h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Total Cash In</h5>
+                    <p class="card-text fs-3 fw-bold">Rs {{ total_cash_in|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card text-center text-white bg-danger h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Total Cash Out</h5>
+                    <p class="card-text fs-3 fw-bold">Rs {{ total_cash_out|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card text-center text-white {% if net_income >= 0 %}bg-info{% else %}bg-warning text-dark{% endif %} h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Net Income</h5>
+                    <p class="card-text fs-3 fw-bold">Rs {{ net_income|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  <h4>Top Products</h4>
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>Total Quantity Sold</th>
-        <th>Total Sales Amount</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for ps in sales_stats.product_stats %}
-        <tr>
-          <td>{{ ps.product__name }}</td>
-          <td>{{ ps.total_quantity }}</td>
-          <td>₹{{ ps.total_revenue }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+    <!-- Detailed Reports Section -->
+    <div class="row g-4">
+        <!-- Sales by Day -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header"><h5>Sales by Day</h5></div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th class="text-end">Total Sales</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sale in sales_by_day %}
+                                <tr>
+                                    <td>{{ sale.day|date:"d M, Y" }}</td>
+                                    <td class="text-end">Rs {{ sale.daily_total|floatformat:2 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="2" class="text-center">No sales data for this period.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Selling Products -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header"><h5>Top Selling Products</h5></div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-center">Quantity Sold</th>
+                                    <th class="text-end">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in top_products %}
+                                <tr>
+                                    <td>{{ product.product__name }}</td>
+                                    <td class="text-center">{{ product.total_quantity }}</td>
+                                    <td class="text-end">Rs {{ product.total_revenue|floatformat:2 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="text-center">No product sales data for this period.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

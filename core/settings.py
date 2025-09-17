@@ -33,6 +33,8 @@ INSTALLED_APPS = [
     'reports',
     'core',
     'inventory',
+    
+    'django_filters',
 ]
 
 MIDDLEWARE = [

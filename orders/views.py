@@ -2,9 +2,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.views.generic import ListView, DetailView
 from django.urls import reverse_lazy
-
+from django.db.models import Sum 
 from customers.forms import SelectCustomerForm
 from customers.models import Customer
+from orders.filters import OrderFilter
 from products.forms import SelectProductsForm
 from products.models import Product
 from .models import OrderItem, SalesOrder
@@ -15,6 +16,23 @@ class OrderListView(ListView):
     model = SalesOrder
     template_name = 'orders/order_list.html'
     context_object_name = 'orders'
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = super().get_queryset().order_by('-created_at')
+        self.filterset = OrderFilter(self.request.GET, queryset=queryset)
+        return self.filterset.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter'] = self.filterset
+        
+        # --- Add this line to calculate the sum of the filtered queryset ---
+        context['total_amount_sum'] = self.filterset.qs.aggregate(
+            total=Sum('total_amount')
+        )['total'] or 0
+
+        return context
 
 
 class OrderCreateView(View):

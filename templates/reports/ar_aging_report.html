@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load form_tags %}
+{% block title %}A/R Aging Report{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="mb-4">
+        <h2 class="mb-0">Accounts Receivable Aging</h2>
+        <p class="text-muted">As of {{ report_date|date:"F d, Y" }}</p>
+    </div>
+
+    <!-- A/R Aging Table -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Customer Name</th>
+                            {% for name in buckets %}
+                                <th class="text-end">{{ name }}</th>
+                            {% endfor %}
+                            <th class="text-end">Total Due</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for customer_name, data in report_data.items %}
+                        <tr>
+                            <td>{{ customer_name }}</td>
+                            {% for bucket_name, bucket_data in buckets.items %}
+                                <td class="text-end">
+                                    {% with amount=data.buckets|get_item:bucket_name %}
+                                        {% if amount > 0 %}
+                                            Rs {{ amount|floatformat:2 }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                            {% endfor %}
+                            <td class="text-end fw-bold">Rs {{ data.total_due|floatformat:2 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{{ buckets|length|add:2 }}" class="text-center p-4">
+                                All accounts are settled. No outstanding receivables.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-light fw-bold">
+                        <tr>
+                            <td>Grand Total</td>
+                            {% for name, data in buckets.items %}
+                                <td class="text-end">Rs {{ data.total|floatformat:2 }}</td>
+                            {% endfor %}
+                            <td class="text-end">Rs {% with total_sum=0 %}
+                                {% for name, data in buckets.items %}
+                                    {% with total_sum=total_sum|add:data.total %}{% endwith %}
+                                {% endfor %}
+                                {{ total_sum|floatformat:2 }}
+                            {% endwith %}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
