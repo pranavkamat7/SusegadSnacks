@@ -88,7 +88,7 @@
                     </td>
                     <td class="text-center">{{ item.quantity }}</td>
                     <td class="text-center">{% widthratio item.quantity 1 item.product.weight_gms %}</td>
-                    <td class="text-end">Rs {{item.price }}</td>
+                    <td class="text-end">Rs {% widthratio item.quantity 1 item.product.ptr %}</td>
                 </tr>
                 {% endfor %}
             </tbody>
